@@ -1,6 +1,7 @@
 ### Main Functions ###
 ### Goals:
 # Linear Regression Model
+#   Loss Functions, Gradient Descent
 # Neural Network Model
 # Brain Inspired NNM
 # Gradient Descent (Stochastic too)
@@ -23,8 +24,8 @@ import math
 def split():
     return
 
-class LinearRegression(X_Train, Y_Train):
-    def __init__(self):
+class LinearRegression():
+    def __init__(self, X_Train, Y_Train):
         model = self.fit(X_Train, Y_Train)
 
     def fit(self, X_Train, Y_Train):
