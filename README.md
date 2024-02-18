@@ -3,7 +3,9 @@ Welcome to Moot Pez Learn, a fully-fledged Python Machine Learning Library
 Blueprint:
 MPLearn will be the main harness file contaning every method, which may pull from supporting files.
 
-
 Usage:
 Do as follows:
-import MPLearn
+import MPL
+
+Link to Collab Test Harness:
+https://colab.research.google.com/drive/1dnIC5Zwx3Q3QJd6-INnsUHM8WbPgtiXL?usp=sharing
