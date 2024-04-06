@@ -25,7 +25,12 @@ class NeuralNetwork:
         self.input = Layer
         self.activation_function = self.activation_function
 
+"""
+"""
 class Layer(NeuralNetwork):
+    """
+    Types of layers: Fully-Connected (Dense), Convolutional, Recurrent, Pooling, Dropout
+    """
     def __init__self(self, neurons: int, type: str):
         self.neurons = neurons
         self.type = type
@@ -36,7 +41,6 @@ class Neuron(Layer):
         self.activation_function = activation_function
         self.input = input
         self.output = output
-
 
 
 class Activation:
