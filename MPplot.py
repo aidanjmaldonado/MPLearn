@@ -1,7 +1,7 @@
 import numpy as np, pandas as pd
 import matplotlib.pyplot as plt
 
-
+## import pezplot as pp
 
 def heights_vs_stride(data, ax):
     # Format data
@@ -89,10 +89,28 @@ def basic_bar(data, ax, column, labels = None, title = None, xlabel = None, ylab
     # Plot Bar Data
     ax.bar(x, row, width = width, color = colors, label = labels)
 
-    # Add Legend
+    ## Add Legend
     if legend:
         ax.legend(fontsize = legendsize)
+    return
 
+def basic_mbar():
+    return
+
+def basic_scatter():
+    return
+    
+def basic_line():
+    return
+
+
+class Pplot():
+    def __init__(self, multi = False, dim = [1,1]):
+        self.multi = multi
+        self.dim = dim
+
+        if self.multi:
+            # dim = 
 
 
 def main():
@@ -101,7 +119,7 @@ def main():
     Calculate the Mean and Standard Deviation
     Run a Hypothesis Test on Null: There is a correlation between height and speed
     """
-    data = pd.read_csv("Ece30Asgn1Data.csv")
+    data = pd.read_csv("files/csvsets/Ece30Asgn1Data.csv")
 
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     plt.subplots_adjust(left=0.125, right=0.9, bottom=0.11, top=0.929, wspace=0.204, hspace=0.249)
