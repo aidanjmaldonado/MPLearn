@@ -104,13 +104,22 @@ def basic_line():
     return
 
 
-class Pplot():
-    def __init__(self, multi = False, dim = [1,1]):
-        self.multi = multi
+class MPLPlot():
+    def __init__(self, is_multiplot = False, dim: tuple[int, int] = (1,1)):
+        self.is_multiplot = is_multiplot
         self.dim = dim
 
-        if self.multi:
-            # dim = 
+        if self.is_multiplot or dim != [1,1]:
+            self.is_multiplot = True
+            self.fig, self.axs = plt.subplots(dim[0], dim[1])
+            print("hey! Here are your blank axs")
+            print(len(self.axs))
+        else:
+            dim = [1,1]
+            self.fig, ax = plt.subplots(dim[0], dim[1])
+
+    def show(self):
+        plt.show()
 
 
 def main():
@@ -151,7 +160,10 @@ def main():
 
     ## First: Create a plot of Effect of Height (cm) on Stride Length (cm)
     # Need: Heights - Stride Lengths - People - Line Graph
-    plt.show()
+    # plt.show()
+    print("hotdog")
+    myplot = MPLPlot(is_multiplot=True)
+
 
 
 
