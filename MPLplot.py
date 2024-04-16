@@ -113,7 +113,7 @@ class MPLPlot():
             self.is_multiplot = True
             self.fig, self.axs = plt.subplots(dim[0], dim[1])
             print("hey! Here are your blank axs")
-            print(len(self.axs))
+            # print(len(self.axs))
         else:
             dim = [1,1]
             self.fig, ax = plt.subplots(dim[0], dim[1])
@@ -160,7 +160,7 @@ def main():
 
     ## First: Create a plot of Effect of Height (cm) on Stride Length (cm)
     # Need: Heights - Stride Lengths - People - Line Graph
-    # plt.show()
+    plt.show()
     print("hotdog")
     myplot = MPLPlot(is_multiplot=True)
 
