@@ -113,10 +113,16 @@ class MPLPlot():
             self.is_multiplot = True
             self.fig, self.axs = plt.subplots(dim[0], dim[1])
             print("hey! Here are your blank axs")
-            # print(len(self.axs))
+            self.axlist = np.array(self.axs)
+            print(self.axlist.shape)
+            print(self.axlist.size)
+            print(self.axlist)
+
         else:
             dim = [1,1]
             self.fig, ax = plt.subplots(dim[0], dim[1])
+
+    # def add_function(type: function, ax)
 
     def show(self):
         plt.show()
@@ -160,9 +166,9 @@ def main():
 
     ## First: Create a plot of Effect of Height (cm) on Stride Length (cm)
     # Need: Heights - Stride Lengths - People - Line Graph
-    plt.show()
+    # plt.show()
     print("hotdog")
-    myplot = MPLPlot(is_multiplot=True)
+    myplot = MPLPlot(is_multiplot=True, dim=(2,3))
 
 
 
