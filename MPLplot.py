@@ -67,22 +67,34 @@ class MPLPlot():
         self.is_multiplot = is_multiplot
         self.dim = dim
         self.rows, self.cols = dim[0], dim[1]
+        if self.cols < 1: self.cols, self.dim = 1, (self.rows, 1)
+        if self.rows < 1: self.rows, self.dim = 1, (1, self.cols)
         self.filled = np.zeros(dim)
         self.index = 1
 
-        if self.is_multiplot or dim != [1,1]:
+        if self.is_multiplot: #and self.dim != (1,1)
             self.is_multiplot = True
             
             # Create the fig and establish the axs array
-            self.fig, self.axs = plt.subplots(dim[0], dim[1])
-                # plt.subplots_adjust(left=0.125, right=0.9, bottom=0.11, top=0.929, wspace=0.204, hspace=0.249)
-                # To consider ^
+            self.fig, self.axs = plt.subplots(self.dim[0], self.dim[1])
+            if self.cols <= 2:
+                plt.subplots_adjust(left=0.063, right=0.943, bottom=0.10, top=0.917, wspace=0.156, hspace=0.51)
+            else:
+                plt.subplots_adjust(left=0.125, right=0.9, bottom=0.04, top=0.965, wspace=0.204, hspace=0.26)
 
             # Store the axs array in a numpy array
             self.axs = np.array(self.axs)
+            if (self.dim[0] == 1):
+                print(self.dim, self.axs.shape, "hey we're trying to reshape the x")
+                self.axs = np.array([self.axs])
+                print(self.axs.shape, self.axs)
+            if (self.dim[1] == 1):
+                self.axs.reshape((self.dim[1], 1))
+        
+            
         else:
             dim = [1,1]
-            self.fig, ax = plt.subplots(dim[0], dim[1])
+            self.fig, ax = plt.subplots(self.dim[0], self.dim[1])
 
 
     # def add_function(type: function, ax)
@@ -109,6 +121,10 @@ class MPLPlot():
             specifications['label'] = None
         if 'xlabel' not in specifications:
             specifications['xlabel'] = ''
+        if 'xlabelfontsize' not in specifications:
+            specifications['xlabelfontsize'] = 8
+        if 'ylabelfontsize' not in specifications:
+            specifications['ylabelfontsize'] = 8
         if 'ylabel' not in specifications:
             specifications['ylabel'] = ''
         if 'xticklabel' not in specifications:
@@ -130,9 +146,10 @@ class MPLPlot():
 
         # Plot
         if (plot_type == MPLPlot.basic_bar):
-                self.basic_bar(self.axs[rowindex, columnindex], specifications['data1'], specifications['data2'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], ylabel=specifications['ylabel'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'])
+                print(self.axs.shape, self.axs)
+                self.basic_bar(self.axs[rowindex, columnindex], specifications['data1'], specifications['data2'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'])
 
-    def basic_bar(self, ax, data, height, label=None, title = '', titlefont = 8, xlabel = '', ylabel = '', xticklabel = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6):
+    def basic_bar(self, ax, data, height, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabel = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6):
         
         # Transpose height input
         row = height.T
@@ -144,22 +161,19 @@ class MPLPlot():
 
         # Plot Bar Data
         ax.bar(x, row, label=label, color=color, width=width)
-        ax.set_title(title, fontsize = titlefont)
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
+        ax.set_title(title, fontsize=titlefont)
+        ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
+        ax.set_ylabel(ylabel, fontsize=ylabelfontsize)
 
 
         #Format p2
         if xtickrange is None:
             xtickrange = xtickrange = range(1, data.shape[0] + 1)
             ax.set_xticks(xtickrange)
-
-        # Fix this using https://stackoverflow.com/questions/63723514/userwarning-fixedformatter-should-only-be-used-together-with-fixedlocator
-        if xtickrange is not None:
             if xticklabel is not None:
                 ax.set_xticklabels(xticklabel)
             else:
-                ax.set_xticklabels([x for x in range(len(height) + 1)])
+                ax.set_xticklabels([x for x in range(len(height) + 1)]) # Fix this using https://stackoverflow.com/questions/63723514/userwarning-fixedformatter-should-only-be-used-together-with-fixedlocator
 
 
         ## Add Legend
@@ -187,10 +201,10 @@ def main():
 
     # Add Plots
     myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgTime, title="Average Time Baisc Unformated Plot")
-    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgTime, label=data.Name, title="Average Effect of Stride Length (cm) on Travel Time (s)", xlabel="Participants", ylabel="Time (seconds)", xticklabels=data.Name, colors=['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'], width=0.5, legend=True, legendsize=6)
-    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgStrides, title="Average Strides Basic Plot", colors='red')
-    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgVelocity, title="Average Velocity Basic Plot", colors='purple')
-    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.T2Velocity, title="Trial 2 Velocity", xlabel="Who's the fastest?", colors='green')
+    # myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgTime, label=data.Name, title="Average Effect of Stride Length (cm) on Travel Time (s)", xlabel="Participants", ylabel="Time (seconds)", xticklabels=data.Name, colors=['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'], width=0.5, legend=True, legendsize=6)
+    # myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgStrides, title="Average Strides Basic Plot", colors='red')
+    # myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgVelocity, title="Average Velocity Basic Plot", colors='purple')
+    # myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.T2Velocity, title="Trial 2 Velocity", xlabel="Who's the fastest?", colors='green')
 
     #MPLPlot.show()
     myplot.show()
