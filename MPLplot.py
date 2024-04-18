@@ -52,49 +52,6 @@ def stride_vs_time(data, ax):
     # Add Legend
     ax.legend(fontsize = 8)
 
-# def basic_bar(ax, data, column, labels = None, title = None, xlabel = None, ylabel = None, xtickrange = None, xticklabels = None, colors = None, width = .3, legend = False, legendsize = 8):
-
-#     ## Format data
-#     # Transpose column data
-#     row = column.T
-
-#     # Create horizontal axis
-#     x = np.arange(len(column))
-
-#     # Set default color to teal if not specified
-#     if colors is None:
-#         colors = ["teal" for x in range(data.shape[0])]
-
-#     # Set default xticklabels if not specified
-#     if xticklabels is None:
-#         xticklabels = [x for x in range(data.shape[0])]
-
-#     # Set default xtickrange if not specified
-#     if xtickrange is None:
-#         xtickrange = range(data.shape[0])
-
-#     # Label Axes
-#     if title is not None:
-#         ax.set_title("{}".format(title))
-
-#     # Add x labels if specified
-#     if xlabel is not None:
-#         ax.set_xlabel("{}".format(xlabel))
-
-#     # Add y labels if specified
-#     if ylabel is not None:
-#         ax.set_ylabel("{}".format(ylabel))
-
-#     ## Create Plot
-
-#     # Plot Bar Data
-#     ax.bar(x, row, width = width, color = colors, label = labels)
-
-#     ## Add Legend
-#     if legend:
-#         ax.legend(fontsize = legendsize)
-#     return
-
 def basic_mbar():
     return
 
@@ -118,6 +75,8 @@ class MPLPlot():
             
             # Create the fig and establish the axs array
             self.fig, self.axs = plt.subplots(dim[0], dim[1])
+                # plt.subplots_adjust(left=0.125, right=0.9, bottom=0.11, top=0.929, wspace=0.204, hspace=0.249)
+                # To consider ^
 
             # Store the axs array in a numpy array
             self.axs = np.array(self.axs)
@@ -127,62 +86,81 @@ class MPLPlot():
 
 
     # def add_function(type: function, ax)
-    def add_plot(self, plot_type: callable, specifications: dict):
-        # Sweet! add_plot() almosttttt done, just need to work out these 2 cases:::
-        #   Plots need to be customizable, like this: How can I do that though since basic_bar() was added as a parameter: hm
-        #   OH! I KNOW!!
-        # Check this out
-        # Alsot second requirement has to do with when self.insert_plot() is added and it's when self.index points to something already full, like quadratic caching 
+    def add_plot(self, plot_type: callable, **specifications):
+        # New plan, **specifications
+        # Grand filtering/defaulting:
+        if 'data1' not in specifications:
+            specifications['data1'] = None
+            print("Empty graph created, no data passed in")
+            return
+        if 'data2' not in specifications:
+            specifications['data2'] = None
+        if 'data3' not in specifications:
+            specifications['data3'] = None ## Rework these names ... xaxis? yaxis? zaxis? # what to do about this . . .
+        if 'title' not in specifications:
+            specifications['title'] = ''
+        if 'titlefont' not in specifications:
+            specifications['titlefont'] = 8
+        if 'color' not in specifications:
+            specifications['color'] = 'teal'
+        if 'colors' not in specifications:
+            specifications['colors'] = ["teal" for x in range(specifications['data1'].shape[0])]
+        if 'label' not in specifications:
+            specifications['label'] = None
+        if 'xlabel' not in specifications:
+            specifications['xlabel'] = ''
+        if 'ylabel' not in specifications:
+            specifications['ylabel'] = ''
+        if 'xticklabel' not in specifications:
+            specifications['xticklabel'] = None
+        if 'xtickrange' not in specifications:
+            specifications['xtickrange'] = [x for x in range(1, specifications['data1'].shape[0] + 1)]
+        if 'width' not in specifications:
+            specifications['width'] = 0.5
+        if 'legend' not in specifications:
+            specifications['legend'] = False
+        if 'legendsize' not in specifications:
+            specifications['legendsize'] = 6
+ 
+
+        # Determine which plot to place in ## Need some kind of error handling
         columnindex = ((self.index % self.cols) - 1)
         rowindex = ((ceil(self.index / self.cols)) - 1)
-
-        # plot_type(data, self.axs[rowindex, columnindex], data2)
-        # 
-        if plot_type == MPLPlot.basic_bar:
-            print("pASsing in this data:")
-            print(specifications['xaxis'])
-            self.basic_bar(self.axs[rowindex, columnindex], specifications['xaxis'], specifications['yaxis'])
         self.index += 1
 
-    def basic_bar(ax, data, column, labels = None, title = None, xlabel = None, ylabel = None, xtickrange = None, xticklabels = None, colors = None, width = .3, legend = False, legendsize = 8):
+        # Plot
+        if (plot_type == MPLPlot.basic_bar):
+                self.basic_bar(self.axs[rowindex, columnindex], specifications['data1'], specifications['data2'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], ylabel=specifications['ylabel'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'])
 
-        ## Format data
-        # Transpose column data
-        row = column.T
+    def basic_bar(self, ax, data, height, label=None, title = '', titlefont = 8, xlabel = '', ylabel = '', xticklabel = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6):
+        
+        # Transpose height input
+        row = height.T
 
         # Create horizontal axis
-        x = np.arange(len(column))
-
-        # Set default color to teal if not specified
-        print("EHUIGYFTDRUYFIUGOIH")
-        print(column)
-        if colors is None:
-            colors = ["teal" for x in range(data.shape[0])]
-
-        # Set default xticklabels if not specified
-        if xticklabels is None:
-            xticklabels = [x for x in range(data.shape[0])]
-
-        # Set default xtickrange if not specified
-        if xtickrange is None:
-            xtickrange = range(data.shape[0])
-
-        # Label Axes
-        if title is not None:
-            ax.set_title("{}".format(title))
-
-        # Add x labels if specified
-        if xlabel is not None:
-            ax.set_xlabel("{}".format(xlabel))
-
-        # Add y labels if specified
-        if ylabel is not None:
-            ax.set_ylabel("{}".format(ylabel))
+        x = np.arange(len(height))
 
         ## Create Plot
 
         # Plot Bar Data
-        ax.bar(x, row, width = width, color = colors, label = labels)
+        ax.bar(x, row, label=label, color=color, width=width)
+        ax.set_title(title, fontsize = titlefont)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+
+
+        #Format p2
+        if xtickrange is None:
+            xtickrange = xtickrange = range(1, data.shape[0] + 1)
+            ax.set_xticks(xtickrange)
+
+        # Fix this using https://stackoverflow.com/questions/63723514/userwarning-fixedformatter-should-only-be-used-together-with-fixedlocator
+        if xtickrange is not None:
+            if xticklabel is not None:
+                ax.set_xticklabels(xticklabel)
+            else:
+                ax.set_xticklabels([x for x in range(len(height) + 1)])
+
 
         ## Add Legend
         if legend:
@@ -200,57 +178,22 @@ def main():
     Calculate the Mean and Standard Deviation
     Run a Hypothesis Test on Null: There is a correlation between height and speed
     """
+
+    # Import data
     data = pd.read_csv("files/csvsets/Ece30Asgn1Data.csv")
 
-    # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-    # plt.subplots_adjust(left=0.125, right=0.9, bottom=0.11, top=0.929, wspace=0.204, hspace=0.249)
-
-    # # create Linear Graph of Height vs Stride Length
-    # heights_vs_stride(data, ax1)
-
-    # # Create Multi Bar Graph of Trial Times
-    # stride_vs_time(data, ax2)
-
-    # # Create Basic Bar Graph of Average Time
-    # basic_bar(data,
-    #           ax3,
-            #   data.AvgTime,
-            #   labels = data.Name,
-            #   title = "Average Effect of Stride Length (cm) on Travel Time (s)",
-            #   xlabel = "Participants",
-            #   ylabel = "Time (seconds)",
-            #   xticklabels = data.Name,
-            #   colors = ['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'],
-            #   width = 0.5,
-            #   legend = True,
-            #   legendsize = 6)
-
-    # Dummy test basic bar
+    # Create MPLPlot
     myplot = MPLPlot(is_multiplot=True, dim=(2,3))
-    #This should be a dictionary ... so ordering isn't funky 
-    myplot.add_plot(plot_type=MPLPlot.basic_bar, specifications = {'yaxis':data, 
-                                                             'xaxis': data.AvgTime,
-                                                             'labels': data.Name, #labels
-                                                            'title': "Average Effect of Stride Length (cm) on Travel Time (s)", #title
-                                                            'xlabel': "Participants", #xlabel
-                                                            'ylabel': "Time (seconds)", #ylabel
-                                                            'xticklabel': data.Name, #xticklabels
-                                                            'colors': ['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'], #colors
-                                                            'width': 0.5, #width
-                                                            'legend': True, #legend
-                                                            'legendsize': 6} #legendsize
-    )   
-    
-    
-    
 
+    # Add Plots
+    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgTime, title="Average Time Baisc Unformated Plot")
+    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgTime, label=data.Name, title="Average Effect of Stride Length (cm) on Travel Time (s)", xlabel="Participants", ylabel="Time (seconds)", xticklabels=data.Name, colors=['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'], width=0.5, legend=True, legendsize=6)
+    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgStrides, title="Average Strides Basic Plot", colors='red')
+    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgVelocity, title="Average Velocity Basic Plot", colors='purple')
+    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.T2Velocity, title="Trial 2 Velocity", xlabel="Who's the fastest?", colors='green')
+
+    #MPLPlot.show()
     myplot.show()
-
-    ## First: Create a plot of Effect of Height (cm) on Stride Length (cm)
-    # Need: Heights - Stride Lengths - People - Line Graph
-    # plt.show()
-    print("hotdog")
-
 
 
 
