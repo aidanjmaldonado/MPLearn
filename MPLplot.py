@@ -118,7 +118,7 @@ class MPLPlot():
                 break
 
         # Plot
-        self.plot(plot_type, rowindex, colindex, specifications)
+        self.plot(plot_type, rowindex, columnindex, specifications)
         return
         
     def insert_plot(self, plot_type: callable, pindex: int, **specifications):
@@ -136,7 +136,7 @@ class MPLPlot():
         rowindex = ((ceil(pindex / self.cols)) - 1)
         if (self.filled[rowindex, columnindex] == 0):
             self.filled[rowindex, columnindex] = 1
-            self.plot(plot_type, rowindex, colindex, specifications)
+            self.plot(plot_type, rowindex, columnindex, specifications)
             return
 
         while (True):
@@ -152,7 +152,7 @@ class MPLPlot():
 
 
         # Plot 
-        self.plot(plot_type, rowindex, colindex, specifications)
+        self.plot(plot_type, rowindex, columnindex, specifications)
         return
 
     def grand_filtering(specifications: dict):
