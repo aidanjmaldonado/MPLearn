@@ -84,15 +84,17 @@ class MPLPlot():
 
             # Store the axs array in a numpy array
             self.axs = np.array(self.axs)
+
+            # Reshape to eliminate 0 dimension
             if (self.dim[0] == 1):
-                print(self.dim, self.axs.shape, "hey we're trying to reshape the x")
                 self.axs = np.array([self.axs])
-                print(self.axs.shape, self.axs)
+                print("Fixed x", self.axs.shape)
             if (self.dim[1] == 1):
-                self.axs.reshape((self.dim[1], 1))
-        
+                self.axs = self.axs.reshape(-1, 1)
+                print("Fixed y", self.axs.shape)
             
         else:
+            print("wtf did we go here?\n\n")
             dim = [1,1]
             self.fig, ax = plt.subplots(self.dim[0], self.dim[1])
 
@@ -147,6 +149,7 @@ class MPLPlot():
         # Plot
         if (plot_type == MPLPlot.basic_bar):
                 print(self.axs.shape, self.axs)
+                print("Hey we're about to plot at ({},{})".format(rowindex, columnindex), self.dim, self.rows, self.cols, rowindex, columnindex, self.index)
                 self.basic_bar(self.axs[rowindex, columnindex], specifications['data1'], specifications['data2'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'])
 
     def basic_bar(self, ax, data, height, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabel = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6):
@@ -197,12 +200,12 @@ def main():
     data = pd.read_csv("files/csvsets/Ece30Asgn1Data.csv")
 
     # Create MPLPlot
-    myplot = MPLPlot(is_multiplot=True, dim=(2,3))
+    myplot = MPLPlot(is_multiplot=True, dim=(5,1))
 
     # Add Plots
     myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgTime, title="Average Time Baisc Unformated Plot")
-    # myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgTime, label=data.Name, title="Average Effect of Stride Length (cm) on Travel Time (s)", xlabel="Participants", ylabel="Time (seconds)", xticklabels=data.Name, colors=['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'], width=0.5, legend=True, legendsize=6)
-    # myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgStrides, title="Average Strides Basic Plot", colors='red')
+    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgTime, label=data.Name, title="Average Effect of Stride Length (cm) on Travel Time (s)", xlabel="Participants", ylabel="Time (seconds)", xticklabels=data.Name, colors=['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'], width=0.5, legend=True, legendsize=6)
+    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgStrides, title="Average Strides Basic Plot", colors='red')
     # myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgVelocity, title="Average Velocity Basic Plot", colors='purple')
     # myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.T2Velocity, title="Trial 2 Velocity", xlabel="Who's the fastest?", colors='green')
 
