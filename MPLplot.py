@@ -103,12 +103,12 @@ class MPLPlot():
     def add_plot(self, plot_type: callable, **specifications):
         # New plan, **specifications
         # Grand filtering/defaulting:
-        if 'data1' not in specifications:
-            specifications['data1'] = None
+        if 'data' not in specifications:
+            specifications['data'] = None
             print("Empty graph created, no data passed in")
             return
-        if 'data2' not in specifications:
-            specifications['data2'] = None
+        if 'height' not in specifications:
+            specifications['height'] = None
         if 'data3' not in specifications:
             specifications['data3'] = None ## Rework these names ... xaxis? yaxis? zaxis? # what to do about this . . .
         if 'title' not in specifications:
@@ -118,7 +118,7 @@ class MPLPlot():
         if 'color' not in specifications:
             specifications['color'] = 'teal'
         if 'colors' not in specifications:
-            specifications['colors'] = ["teal" for x in range(specifications['data1'].shape[0])]
+            specifications['colors'] = ["teal" for x in range(specifications['data'].shape[0])]
         if 'label' not in specifications:
             specifications['label'] = None
         if 'xlabel' not in specifications:
@@ -132,7 +132,7 @@ class MPLPlot():
         if 'xticklabel' not in specifications:
             specifications['xticklabel'] = None
         if 'xtickrange' not in specifications:
-            specifications['xtickrange'] = [x for x in range(1, specifications['data1'].shape[0] + 1)]
+            specifications['xtickrange'] = [x for x in range(1, specifications['data'].shape[0] + 1)]
         if 'width' not in specifications:
             specifications['width'] = 0.5
         if 'legend' not in specifications:
@@ -148,9 +148,7 @@ class MPLPlot():
 
         # Plot
         if (plot_type == MPLPlot.basic_bar):
-                print(self.axs.shape, self.axs)
-                print("Hey we're about to plot at ({},{})".format(rowindex, columnindex), self.dim, self.rows, self.cols, rowindex, columnindex, self.index)
-                self.basic_bar(self.axs[rowindex, columnindex], specifications['data1'], specifications['data2'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'])
+                self.basic_bar(self.axs[rowindex, columnindex], specifications['data'], specifications['height'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'])
 
     def basic_bar(self, ax, data, height, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabel = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6):
         
@@ -203,9 +201,9 @@ def main():
     myplot = MPLPlot(is_multiplot=True, dim=(5,1))
 
     # Add Plots
-    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgTime, title="Average Time Baisc Unformated Plot")
-    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgTime, label=data.Name, title="Average Effect of Stride Length (cm) on Travel Time (s)", xlabel="Participants", ylabel="Time (seconds)", xticklabels=data.Name, colors=['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'], width=0.5, legend=True, legendsize=6)
-    myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgStrides, title="Average Strides Basic Plot", colors='red')
+    myplot.add_plot(MPLPlot.basic_bar, data=data, height=data.AvgTime, title="Average Time Baisc Unformated Plot")
+    myplot.add_plot(MPLPlot.basic_bar, data=data, height=data.AvgTime, label=data.Name, title="Average Effect of Stride Length (cm) on Travel Time (s)", xlabel="Participants", ylabel="Time (seconds)", xticklabels=data.Name, colors=['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'], width=0.5, legend=True, legendsize=6)
+    myplot.add_plot(MPLPlot.basic_bar, data=data, height=data.AvgStrides, title="Average Strides Basic Plot", colors='red')
     # myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.AvgVelocity, title="Average Velocity Basic Plot", colors='purple')
     # myplot.add_plot(MPLPlot.basic_bar, data1=data, data2=data.T2Velocity, title="Trial 2 Velocity", xlabel="Who's the fastest?", colors='green')
 
