@@ -102,43 +102,9 @@ class MPLPlot():
     # def add_function(type: function, ax)
     def add_plot(self, plot_type: callable, **specifications):
 
-        # Grand filtering/defaulting:
-        if 'data' not in specifications:
-            specifications['data'] = None
-            print("Empty graph created, no data passed in")
-            return
-        if 'height' not in specifications:
-            specifications['height'] = None
-        if 'title' not in specifications:
-            specifications['title'] = ''
-        if 'titlefont' not in specifications:
-            specifications['titlefont'] = 8
-        if 'color' not in specifications:
-            specifications['color'] = 'teal'
-        if 'colors' not in specifications:
-            specifications['colors'] = ["teal" for x in range(specifications['data'].shape[0])]
-        if 'label' not in specifications:
-            specifications['label'] = None
-        if 'xlabel' not in specifications:
-            specifications['xlabel'] = ''
-        if 'xlabelfontsize' not in specifications:
-            specifications['xlabelfontsize'] = 8
-        if 'ylabelfontsize' not in specifications:
-            specifications['ylabelfontsize'] = 8
-        if 'ylabel' not in specifications:
-            specifications['ylabel'] = ''
-        if 'xticklabel' not in specifications:
-            specifications['xticklabel'] = None
-        if 'xtickrange' not in specifications:
-            specifications['xtickrange'] = [x for x in range(1, specifications['data'].shape[0] + 1)]
-        if 'width' not in specifications:
-            specifications['width'] = 0.5
-        if 'legend' not in specifications:
-            specifications['legend'] = False
-        if 'legendsize' not in specifications:
-            specifications['legendsize'] = 6
+        # Grand filtering/defaulting: 
+        specifications = MPLPlot.grand_filtering(specifications)
  
-
         # Determine which plot to place in ## Need some kind of error handling
         while (True):
             if (self.index > self.cols * self.rows):
@@ -152,9 +118,9 @@ class MPLPlot():
                 break
 
         # Plot
-        if (plot_type == MPLPlot.basic_bar):
-                self.basic_bar(self.axs[rowindex, columnindex], specifications['data'], specifications['height'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'])
-
+        self.plot(plot_type, rowindex, colindex, specifications)
+        return
+        
     def insert_plot(self, plot_type: callable, pindex: int, **specifications):
         
         # Out of Bounds Error
@@ -162,7 +128,34 @@ class MPLPlot():
             print("Error, out of bounds pindex")
             return 
 
-        # Grand filtering/defaulting:
+        # Grand filtering/defaulting: 
+        specifications = MPLPlot.grand_filtering(specifications)
+
+                # Determine which plot to place in ## Need some kind of error handling
+        columnindex = ((pindex % self.cols) - 1)
+        rowindex = ((ceil(pindex / self.cols)) - 1)
+        if (self.filled[rowindex, columnindex] == 0):
+            self.filled[rowindex, columnindex] = 1
+            self.plot(plot_type, rowindex, colindex, specifications)
+            return
+
+        while (True):
+            if (self.index > self.cols * self.rows):
+                print("multiplot full!")
+                return
+            columnindex = ((self.index % self.cols) - 1)
+            rowindex = ((ceil(self.index / self.cols)) - 1)
+            self.index += 1
+            if (self.filled[rowindex, columnindex] == 0):
+                self.filled[rowindex, columnindex] = 1
+                break
+
+
+        # Plot 
+        self.plot(plot_type, rowindex, colindex, specifications)
+        return
+
+    def grand_filtering(specifications: dict):
         if 'data' not in specifications:
             specifications['data'] = None
             print("Empty graph created, no data passed in")
@@ -197,37 +190,15 @@ class MPLPlot():
             specifications['legend'] = False
         if 'legendsize' not in specifications:
             specifications['legendsize'] = 6
+        
+        return specifications
 
-                # Determine which plot to place in ## Need some kind of error handling
-        columnindex = ((pindex % self.cols) - 1)
-        rowindex = ((ceil(pindex / self.cols)) - 1)
-        if (self.filled[rowindex, columnindex] == 0):
-            self.filled[rowindex, columnindex] = 1
-            if (plot_type == MPLPlot.basic_bar):
-                self.basic_bar(self.axs[rowindex, columnindex], specifications['data'], specifications['height'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'])
-            
-            return
-
-        while (True):
-            if (self.index > self.cols * self.rows):
-                print("multiplot full!")
-                return
-            columnindex = ((self.index % self.cols) - 1)
-            rowindex = ((ceil(self.index / self.cols)) - 1)
-            self.index += 1
-            if (self.filled[rowindex, columnindex] == 0):
-                self.filled[rowindex, columnindex] = 1
-                break
-
-
-
-        # Plot
+    # And now!
+    def plot(self, plot_type: callable, row: int, col: int, specifications: dict):
         if (plot_type == MPLPlot.basic_bar):
-                self.basic_bar(self.axs[rowindex, columnindex], specifications['data'], specifications['height'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'])
+                self.basic_bar(self.axs[row, col], specifications['data'], specifications['height'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'])
         return
-# ugh I feel like this is really redundant but Idk how to not have it repeat. the (if_plot_type == MPLPlt.basic_bar) thing appears 4 times in my code
-    # Do I make it another function!? I *wanted* to use a switch case but pythonn DOESNT HAVE THOSE for somer eason!?!? C does and C was made like 30 years ago bruv
-    # I think I make a new function called def plot() and just pass in all the parameters from specifications lemme push htis though
+
 
 
     def basic_bar(self, ax, data, height, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabel = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6):
