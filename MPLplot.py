@@ -185,15 +185,15 @@ class MPLPlot():
             specifications['ylabelfontsize'] = 8
         if 'ylabel' not in specifications:
             specifications['ylabel'] = ''
-        if 'xticklabel' not in specifications:
-            specifications['xticklabel'] = None
+        if 'xticklabels' not in specifications:
+            specifications['xticklabels'] = None
         if 'xtickrange' not in specifications:
             if specifications['data'] is not None:
-                specifications['xtickrange'] = [x for x in range(1, specifications['data'].shape[0] + 1)]
+                specifications['xtickrange'] = [x for x in range(specifications['data'].shape[0])]
             elif specifications['height'] is not None:
-                specifications['xtickrange'] = [x for x in range(1, specifications['height'].shape[0] + 1)]
+                specifications['xtickrange'] = [x for x in range(specifications['height'].shape[0])]
             elif specifications['x'] is not None:
-                specifications['x'] = [x for x in range(1, specifications['x'].shape[0] + 1)]
+                specifications['xtickrange'] = None
         if 'width' not in specifications:
             specifications['width'] = 0.5
         if 'legend' not in specifications:
@@ -221,14 +221,14 @@ class MPLPlot():
         # I wish Python had switch statements :')
         # The purpose of this function is to take in all the formatted parameters from grand_filtering (specifications) and orderly pass them into the proper plotting function (plot_type)
         if (plot_type == MPLPlot.basic_bar):
-                self.basic_bar(self.axs[row, col], specifications['data'], specifications['height'], bottom=specifications['bottom'], align=specifications['align'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'], xlim=specifications['xlim'], ylim=specifications['ylim'], xscale=specifications['xscale'], yscale=specifications['yscale'])
+                self.basic_bar(self.axs[row, col], specifications['data'], specifications['height'], bottom=specifications['bottom'], align=specifications['align'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabels=specifications['xticklabels'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'], xlim=specifications['xlim'], ylim=specifications['ylim'], xscale=specifications['xscale'], yscale=specifications['yscale'])
         
         if (plot_type == MPLPlot.basic_scatter):
-            self.basic_scatter(self.axs[row, col], specifications['x'], specifications['y'])
+            self.basic_scatter(self.axs[row, col], specifications['x'], specifications['y'], title = specifications['title'], titlefont = specifications['titlefont'], label = specifications['label'], xlabel = specifications['xlabel'], xlabelfontsize = specifications['xlabelfontsize'], ylabel = specifications['ylabel'], ylabelfontsize = specifications['ylabelfontsize'], xlim = specifications['xlim'], ylim = specifications['ylim'], xscale = specifications['xscale'], yscale = specifications['yscale'], xticklabels = specifications['xticklabels'], xtickrange=specifications['xtickrange'], color = specifications['color'],  legend = specifications['legend'], legendsize = specifications['legendsize'] )
 
         return
 
-    def basic_bar(self, ax, data, height, bottom, align, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabel = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6, xlim=(None,None), ylim=(None,None), xscale='linear', yscale='linear'):
+    def basic_bar(self, ax, data, height, bottom, align, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabels = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6, xlim=(None,None), ylim=(None,None), xscale='linear', yscale='linear'):
         
         # Transpose height input
         row = height.T
@@ -248,28 +248,57 @@ class MPLPlot():
         ax.set_xscale(xscale)
         ax.set_yscale(yscale)
 
-        #Format p2
+        #Format xticks :skull_emoji:
         if xtickrange is None:
-            xtickrange = range(1, data.shape[0] + 1)
+            xtickrange = range(height.shape[0])
             ax.set_xticks(xtickrange)
-            if xticklabel is not None:
-                ax.set_xticklabels(xticklabel)
+            if xticklabels is not None:
+                ax.set_xticklabels(xticklabels)
             else:
-                ax.set_xticklabels([x for x in range(len(height) + 1)]) # Fix this using https://stackoverflow.com/questions/63723514/userwarning-fixedformatter-should-only-be-used-together-with-fixedlocator
-
+                ax.set_xticklabels([x for x in range(len(height))]) 
+        else:
+            ax.set_xticks(xtickrange)
+            if xticklabels is not None:
+                ax.set_xticklabels(xticklabels)
+            else:
+                ax.set_xticklabels([x for x in range(len(height))]) 
+       
 
         ## Add Legend
         if legend:
             ax.legend(fontsize = legendsize)
         return
 
-    def basic_scatter(self, ax, x, y):
+    def basic_scatter(self, ax, x, y, title = '', titlefont = 8, label = None, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8, xlim = (None, None), ylim = (None, None), xscale='linear', yscale='linear', xticklabels = None, xtickrange = None, color = None,  legend = False, legendsize = 6):
 
-        ax.scatter(x, y)
-
-
-
+        ## Create Plot
         
+        #Plot Scatter Data
+        ax.scatter(x, y, label=label, color=color)
+        ax.set_title(title, fontsize=titlefont)
+        ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
+        ax.set_ylabel(ylabel, fontsize=ylabelfontsize)
+        ax.set_xlim(xlim[0], xlim[1])
+        ax.set_ylim(ylim[0], ylim[1])
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
+
+        #Format xticks :skull_emoji:
+        if xtickrange is None:
+            pass
+        else:
+            ax.set_xticks(xtickrange)
+            if xticklabels is not None:
+                print(xtickrange)
+                print(xticklabels)
+                ax.set_xticklabels(xticklabels)
+            else:
+                ax.set_xticklabels([x for x in range(len(x))]) 
+
+        ## Add Legend
+        if legend:
+            ax.legend(fontsize = legendsize)
+        return
 
     def show(self):
         plt.show()
