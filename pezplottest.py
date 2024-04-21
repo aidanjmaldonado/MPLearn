@@ -20,8 +20,11 @@ myplot = MPLPlot(is_multiplot=True, dim=((1, 1)))
 # myplot.insert_plot(MPLPlot.basic_bar, 1, data=data, height=data.AvgVelocity, colors='yellow', xscale='log') # Spot 1 is taken so it fills to next free
 # myplot.insert_plot(MPLPlot.basic_bar, 1, data=data, height=data.AvgVelocity, colors='magenta', align='edge', bottom=4, ylim=(0,14)) # Spot 1 is taken so it fills to next free
 
-myplot.add_plot(MPLPlot.basic_scatter, x=data.Height, y=data.AvgTime, xlabel = "Particiapnt Height", ylabel = "Average Time (s)", title="Test Scatterplot", label=data.Name, legend=True, color=['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'])
+myplot.add_plot(MPLPlot.basic_scatter, x=[data.Height, data.Height], y=[data.AvgTime, data.AvgStrides], xlabel = "Participant Height (cm)", title="Test Scatterplot", label=["Average Time", "Average Strides"], legend=True, color=["Blue", "Red"])
 
 # Show the figures
 myplot.show()
 print("bruv 💀")
+print([y for y in data.Height])
+print("hotdog")
+print(data.Height)

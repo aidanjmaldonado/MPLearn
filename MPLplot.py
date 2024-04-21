@@ -274,7 +274,8 @@ class MPLPlot():
         ## Create Plot
         
         #Plot Scatter Data
-        ax.scatter(x, y, label=label, color=color)
+        for i in range(len(x)):
+            ax.scatter(x[i], y[i], label=label[i], color=color[i])
         ax.set_title(title, fontsize=titlefont)
         ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
         ax.set_ylabel(ylabel, fontsize=ylabelfontsize)
