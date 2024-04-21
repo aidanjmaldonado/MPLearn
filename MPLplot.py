@@ -66,37 +66,40 @@ class MPLPlot():
     def __init__(self, is_multiplot = False, dim: tuple[int, int] = (1,1)):
         self.is_multiplot = is_multiplot
         self.dim = dim
-        self.rows, self.cols = dim[0], dim[1]
+        self.rows, self.cols = self.dim[0], self.dim[1]
         if self.cols < 1: self.cols, self.dim = 1, (self.rows, 1)
         if self.rows < 1: self.rows, self.dim = 1, (1, self.cols)
-        self.filled = np.zeros(dim)
+        self.filled = np.zeros(self.dim)
         self.index = 1
 
+        # Correction
+        if self.dim == (1,1):
+            self.is_multiplot = False
+
         if self.is_multiplot: #and self.dim != (1,1)
-            self.is_multiplot = True
             
             # Create the fig and establish the axs array
-            self.fig, self.axs = plt.subplots(self.dim[0], self.dim[1])
+            self.fig, self.axstemp = plt.subplots(self.dim[0], self.dim[1])
+
+            # Purely for visual formatting
             if self.cols <= 2:
                 plt.subplots_adjust(left=0.063, right=0.943, bottom=0.10, top=0.917, wspace=0.156, hspace=0.51)
             else:
                 plt.subplots_adjust(left=0.125, right=0.9, bottom=0.04, top=0.965, wspace=0.204, hspace=0.26)
 
-            # Store the axs array in a numpy array
-            self.axs = np.array(self.axs)
-
-            # Reshape to eliminate 0 dimension
-            if (self.dim[0] == 1):
-                self.axs = np.array([self.axs])
-                print("Fixed x", self.axs.shape)
-            if (self.dim[1] == 1):
-                self.axs = self.axs.reshape(-1, 1)
-                print("Fixed y", self.axs.shape)
+            # Reformat dimensions:
+            self.axs = np.array([[None]*self.dim[1]]*self.dim[0], dtype=object)
+            count = 0
+            for x in range(self.rows):
+                for y in range(self.cols):
+                    self.axs[x, y] = self.axstemp.flatten()[count]
+                    count += 1
             
         else:
-            print("wtf did we go here?\n\n")
-            dim = [1,1]
+            # In the case of is_multiplot == False
+            self.rows, self.cols, self.dim = 1, 1, (1,1)
             self.fig, ax = plt.subplots(self.dim[0], self.dim[1])
+            self.axs = np.array([[ax]])
 
 
     # def add_function(type: function, ax)
@@ -108,7 +111,7 @@ class MPLPlot():
         # Determine which plot to place in ## Need some kind of error handling
         while (True):
             if (self.index > self.cols * self.rows):
-                print("multiplot full!")
+                print("Error when trying to add plot: multiplot full!")
                 return
             columnindex = ((self.index % self.cols) - 1)
             rowindex = ((ceil(self.index / self.cols)) - 1)
@@ -125,7 +128,7 @@ class MPLPlot():
         
         # Out of Bounds Error
         if (pindex < 0 or pindex > self.rows * self.cols):
-            print("Error, out of bounds pindex")
+            print("Error when trying to insert plot: pindex ({}) is out of bounds! (Maximum {})".format(pindex, self.rows * self.cols))
             return 
 
         # Grand filtering/defaulting: 
@@ -141,7 +144,7 @@ class MPLPlot():
 
         while (True):
             if (self.index > self.cols * self.rows):
-                print("multiplot full!")
+                print("Error when trying to add plot: multiplot full!")
                 return
             columnindex = ((self.index % self.cols) - 1)
             rowindex = ((ceil(self.index / self.cols)) - 1)
@@ -202,6 +205,10 @@ class MPLPlot():
             specifications['xscale'] = 'linear'
         if 'yscale' not in specifications:
             specifications['yscale'] = 'linear'
+        if 'x' not in specifications:
+            specifications['x'] = None
+        if 'y' not in specifications:
+            pass
         
         return specifications
 
@@ -224,6 +231,7 @@ class MPLPlot():
         ## Create Plot
 
         # Plot Bar Data
+        print(ax)
         ax.bar(x, row, label=label, color=color, width=width, bottom=bottom, align=align)
         ax.set_title(title, fontsize=titlefont)
         ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
@@ -249,6 +257,10 @@ class MPLPlot():
             ax.legend(fontsize = legendsize)
         return
 
+    def basic_scatte():
+        pass
+
+
 
     def show(self):
         plt.show()
@@ -257,12 +269,12 @@ class MPLPlot():
 
 
     # Nowwwww I will
-        # Add axis limiting (y-scale) functionality  
-            #   ax.set_xlim(-.5, 4.5)
-            #    ax.set_ylim(50, 220)
-        # Add centering functionality DONE
-        # Add Scatter functionality
-        # Add Line graph functionality
+        # Add axis limiting (y-scale) functionality DONE
+            #   ax.set_xlim(-.5, 4.5) DONE
+            #    ax.set_ylim(50, 220) DONE
+        # Add centering functionality DONE 
+        # Add Scatter functionality To-Do
+        # Add Line graph functionality To-Do
 
 
 
