@@ -198,18 +198,22 @@ class MPLPlot():
             specifications['xlim'] = (None,None)
         if 'ylim' not in specifications:
             specifications['ylim'] = (None,None)
+        if 'xscale' not in specifications:
+            specifications['xscale'] = 'linear'
+        if 'yscale' not in specifications:
+            specifications['yscale'] = 'linear'
         
         return specifications
 
 
     def plot(self, plot_type: callable, row: int, col: int, specifications: dict):
         if (plot_type == MPLPlot.basic_bar):
-                self.basic_bar(self.axs[row, col], specifications['data'], specifications['height'], bottom=specifications['bottom'], align=specifications['align'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'], xlim=specifications['xlim'], ylim=specifications['ylim'])
+                self.basic_bar(self.axs[row, col], specifications['data'], specifications['height'], bottom=specifications['bottom'], align=specifications['align'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'], xlim=specifications['xlim'], ylim=specifications['ylim'], xscale=specifications['xscale'], yscale=specifications['yscale'])
         return
 
 
 
-    def basic_bar(self, ax, data, height, bottom, align, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabel = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6, xlim=(None,None), ylim=(None,None)):
+    def basic_bar(self, ax, data, height, bottom, align, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabel = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6, xlim=(None,None), ylim=(None,None), xscale='linear', yscale='linear'):
         
         # Transpose height input
         row = height.T
@@ -225,9 +229,10 @@ class MPLPlot():
         ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
         ax.set_ylabel(ylabel, fontsize=ylabelfontsize)
         ax.set_xlim(xlim[0], xlim[1])
-        print("ylim = {}".format(ylim))
         ax.set_ylim(ylim[0], ylim[1])
-
+        print("xscale is {}, yscale is {}".format(xscale, yscale))
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
 
         #Format p2
         if xtickrange is None:
