@@ -101,22 +101,22 @@ class MPLPlot():
             self.fig, ax = plt.subplots(self.dim[0], self.dim[1])
             self.axs = np.array([[ax]])
 
-
-    # def add_function(type: function, ax)
     def add_plot(self, plot_type: callable, **specifications):
 
         # Grand filtering/defaulting: 
         specifications = MPLPlot.grand_filtering(specifications)
- 
+
         # Determine which plot to place in ## Need some kind of error handling
+        print("Self index is, cols are", self.index, self.cols)
         while (True):
             if (self.index > self.cols * self.rows):
                 print("Error when trying to add plot: multiplot full!")
                 return
-            columnindex = ((self.index % self.cols) - 1)
+            columnindex = ((self.index % (self.cols) - 1))
             rowindex = ((ceil(self.index / self.cols)) - 1)
             self.index += 1
             if (self.filled[rowindex, columnindex] == 0):
+                print("Resulting in a column index: ((self.index % self.cols) - 1)", columnindex)
                 self.filled[rowindex, columnindex] = 1
                 break
 
@@ -135,7 +135,7 @@ class MPLPlot():
         specifications = MPLPlot.grand_filtering(specifications)
 
                 # Determine which plot to place in ## Need some kind of error handling
-        columnindex = ((pindex % self.cols) - 1)
+        columnindex = ((pindex % (self.cols) - 1))
         rowindex = ((ceil(pindex / self.cols)) - 1)
         if (self.filled[rowindex, columnindex] == 0):
             self.filled[rowindex, columnindex] = 1
@@ -161,10 +161,12 @@ class MPLPlot():
     def grand_filtering(specifications: dict):
         if 'data' not in specifications:
             specifications['data'] = None
-            print("Empty graph created, no data passed in")
-            return
         if 'height' not in specifications:
             specifications['height'] = None
+        if 'x' not in specifications:
+            specifications['x'] = None
+        if 'y' not in specifications:
+            specifications['y'] = None
         if 'title' not in specifications:
             specifications['title'] = ''
         if 'titlefont' not in specifications:
@@ -172,7 +174,7 @@ class MPLPlot():
         if 'color' not in specifications:
             specifications['color'] = 'teal'
         if 'colors' not in specifications:
-            specifications['colors'] = ["teal" for x in range(specifications['data'].shape[0])]
+            specifications['colors'] = "teal"
         if 'label' not in specifications:
             specifications['label'] = None
         if 'xlabel' not in specifications:
@@ -186,7 +188,12 @@ class MPLPlot():
         if 'xticklabel' not in specifications:
             specifications['xticklabel'] = None
         if 'xtickrange' not in specifications:
-            specifications['xtickrange'] = [x for x in range(1, specifications['data'].shape[0] + 1)]
+            if specifications['data'] is not None:
+                specifications['xtickrange'] = [x for x in range(1, specifications['data'].shape[0] + 1)]
+            elif specifications['height'] is not None:
+                specifications['xtickrange'] = [x for x in range(1, specifications['height'].shape[0] + 1)]
+            elif specifications['x'] is not None:
+                specifications['x'] = [x for x in range(1, specifications['x'].shape[0] + 1)]
         if 'width' not in specifications:
             specifications['width'] = 0.5
         if 'legend' not in specifications:
@@ -205,20 +212,21 @@ class MPLPlot():
             specifications['xscale'] = 'linear'
         if 'yscale' not in specifications:
             specifications['yscale'] = 'linear'
-        if 'x' not in specifications:
-            specifications['x'] = None
-        if 'y' not in specifications:
-            pass
+
         
         return specifications
 
-
     def plot(self, plot_type: callable, row: int, col: int, specifications: dict):
+        print("Plotting at: ({}, {})".format(row, col))
+        # I wish Python had switch statements :')
+        # The purpose of this function is to take in all the formatted parameters from grand_filtering (specifications) and orderly pass them into the proper plotting function (plot_type)
         if (plot_type == MPLPlot.basic_bar):
                 self.basic_bar(self.axs[row, col], specifications['data'], specifications['height'], bottom=specifications['bottom'], align=specifications['align'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabel=specifications['xticklabel'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'], xlim=specifications['xlim'], ylim=specifications['ylim'], xscale=specifications['xscale'], yscale=specifications['yscale'])
+        
+        if (plot_type == MPLPlot.basic_scatter):
+            self.basic_scatter(self.axs[row, col], specifications['x'], specifications['y'])
+
         return
-
-
 
     def basic_bar(self, ax, data, height, bottom, align, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabel = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6, xlim=(None,None), ylim=(None,None), xscale='linear', yscale='linear'):
         
@@ -231,20 +239,18 @@ class MPLPlot():
         ## Create Plot
 
         # Plot Bar Data
-        print(ax)
         ax.bar(x, row, label=label, color=color, width=width, bottom=bottom, align=align)
         ax.set_title(title, fontsize=titlefont)
         ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
         ax.set_ylabel(ylabel, fontsize=ylabelfontsize)
         ax.set_xlim(xlim[0], xlim[1])
         ax.set_ylim(ylim[0], ylim[1])
-        print("xscale is {}, yscale is {}".format(xscale, yscale))
         ax.set_xscale(xscale)
         ax.set_yscale(yscale)
 
         #Format p2
         if xtickrange is None:
-            xtickrange = xtickrange = range(1, data.shape[0] + 1)
+            xtickrange = range(1, data.shape[0] + 1)
             ax.set_xticks(xtickrange)
             if xticklabel is not None:
                 ax.set_xticklabels(xticklabel)
@@ -257,10 +263,13 @@ class MPLPlot():
             ax.legend(fontsize = legendsize)
         return
 
-    def basic_scatte():
-        pass
+    def basic_scatter(self, ax, x, y):
+
+        ax.scatter(x, y)
 
 
+
+        
 
     def show(self):
         plt.show()
@@ -273,6 +282,7 @@ class MPLPlot():
             #   ax.set_xlim(-.5, 4.5) DONE
             #    ax.set_ylim(50, 220) DONE
         # Add centering functionality DONE 
+        # Fix 1x1, nx1, and 1xn plots :skull_emoji: DONE 💀
         # Add Scatter functionality To-Do
         # Add Line graph functionality To-Do
 
