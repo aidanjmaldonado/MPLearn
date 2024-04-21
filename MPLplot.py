@@ -275,6 +275,7 @@ class MPLPlot():
         
         #Plot Scatter Data
         for i in range(len(x)):
+            print(i, label)
             ax.scatter(x[i], y[i], label=label[i], color=color[i])
         ax.set_title(title, fontsize=titlefont)
         ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
@@ -313,7 +314,7 @@ class MPLPlot():
             #    ax.set_ylim(50, 220) DONE
         # Add centering functionality DONE 
         # Fix 1x1, nx1, and 1xn plots :skull_emoji: DONE 💀
-        # Add Scatter functionality To-Do
+        # Add Scatter functionality To-Do DONE
         # Add Line graph functionality To-Do
 
 
