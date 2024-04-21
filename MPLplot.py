@@ -226,6 +226,10 @@ class MPLPlot():
         if (plot_type == MPLPlot.basic_scatter):
             self.basic_scatter(self.axs[row, col], specifications['x'], specifications['y'], title = specifications['title'], titlefont = specifications['titlefont'], label = specifications['label'], xlabel = specifications['xlabel'], xlabelfontsize = specifications['xlabelfontsize'], ylabel = specifications['ylabel'], ylabelfontsize = specifications['ylabelfontsize'], xlim = specifications['xlim'], ylim = specifications['ylim'], xscale = specifications['xscale'], yscale = specifications['yscale'], xticklabels = specifications['xticklabels'], xtickrange=specifications['xtickrange'], color = specifications['color'],  legend = specifications['legend'], legendsize = specifications['legendsize'] )
 
+        if (plot_type == MPLPlot.basic_plot):
+            self.basic_plot(self.axs[row, col], specifications['x'], specifications['y'], title = specifications['title'], titlefont = specifications['titlefont'], label = specifications['label'], xlabel = specifications['xlabel'], xlabelfontsize = specifications['xlabelfontsize'], ylabel = specifications['ylabel'], ylabelfontsize = specifications['ylabelfontsize'], xlim = specifications['xlim'], ylim = specifications['ylim'], xscale = specifications['xscale'], yscale = specifications['yscale'], xticklabels = specifications['xticklabels'], xtickrange=specifications['xtickrange'], color = specifications['color'],  legend = specifications['legend'], legendsize = specifications['legendsize'] )
+
+
         return
 
     def basic_bar(self, ax, data, height, bottom, align, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabels = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6, xlim=(None,None), ylim=(None,None), xscale='linear', yscale='linear'):
@@ -277,6 +281,39 @@ class MPLPlot():
         for i in range(len(x)):
             print(i, label)
             ax.scatter(x[i], y[i], label=label[i], color=color[i])
+        ax.set_title(title, fontsize=titlefont)
+        ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
+        ax.set_ylabel(ylabel, fontsize=ylabelfontsize)
+        ax.set_xlim(xlim[0], xlim[1])
+        ax.set_ylim(ylim[0], ylim[1])
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
+
+        #Format xticks :skull_emoji:
+        if xtickrange is None:
+            pass
+        else:
+            ax.set_xticks(xtickrange)
+            if xticklabels is not None:
+                print(xtickrange)
+                print(xticklabels)
+                ax.set_xticklabels(xticklabels)
+            else:
+                ax.set_xticklabels([x for x in range(len(x))]) 
+
+        ## Add Legend
+        if legend:
+            ax.legend(fontsize = legendsize)
+        return
+
+    def basic_plot(self, ax, x, y, title = '', titlefont = 8, label = None, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8, xlim = (None, None), ylim = (None, None), xscale='linear', yscale='linear', xticklabels = None, xtickrange = None, color = None,  legend = False, legendsize = 6):
+
+        ## Create Plot
+        
+        #Plot Scatter Data
+        for i in range(len(x)):
+            print(i, label)
+            ax.plot(x[i], y[i], label=label[i], color=color[i])
         ax.set_title(title, fontsize=titlefont)
         ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
         ax.set_ylabel(ylabel, fontsize=ylabelfontsize)
