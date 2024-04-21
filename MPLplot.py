@@ -1,4 +1,4 @@
-import numpy as np, pandas as pd
+import numpy as np, pandas as pd, matplotlib as mpl
 import matplotlib.pyplot as plt
 from math import *
 
@@ -52,18 +52,13 @@ def stride_vs_time(data, ax):
     # Add Legend
     ax.legend(fontsize = 8)
 
-def basic_mbar():
-    return
-
-def basic_scatter():
-    return
-    
-def basic_line():
-    return
-
-
 class MPLPlot():
-    def __init__(self, is_multiplot = False, dim: tuple[int, int] = (1,1)):
+    def __init__(self, is_multiplot = False, dim: tuple[int, int] = (1,1), toolbar=True):
+        print("Oi bruvva me makin a plot innit!")
+        if not toolbar:
+            mpl.rcParams['toolbar'] = 'None'
+
+
         self.is_multiplot = is_multiplot
         self.dim = dim
         self.rows, self.cols = self.dim[0], self.dim[1]
@@ -107,7 +102,6 @@ class MPLPlot():
         specifications = MPLPlot.grand_filtering(specifications)
 
         # Determine which plot to place in ## Need some kind of error handling
-        print("Self index is, cols are", self.index, self.cols)
         while (True):
             if (self.index > self.cols * self.rows):
                 print("Error when trying to add plot: multiplot full!")
@@ -116,7 +110,6 @@ class MPLPlot():
             rowindex = ((ceil(self.index / self.cols)) - 1)
             self.index += 1
             if (self.filled[rowindex, columnindex] == 0):
-                print("Resulting in a column index: ((self.index % self.cols) - 1)", columnindex)
                 self.filled[rowindex, columnindex] = 1
                 break
 
@@ -217,11 +210,10 @@ class MPLPlot():
         return specifications
 
     def plot(self, plot_type: callable, row: int, col: int, specifications: dict):
-        print("Plotting at: ({}, {})".format(row, col))
         # I wish Python had switch statements :')
         # The purpose of this function is to take in all the formatted parameters from grand_filtering (specifications) and orderly pass them into the proper plotting function (plot_type)
         if (plot_type == MPLPlot.basic_bar):
-                self.basic_bar(self.axs[row, col], specifications['data'], specifications['height'], bottom=specifications['bottom'], align=specifications['align'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabels=specifications['xticklabels'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'], xlim=specifications['xlim'], ylim=specifications['ylim'], xscale=specifications['xscale'], yscale=specifications['yscale'])
+                self.basic_bar(self.axs[row, col], specifications['height'], bottom=specifications['bottom'], align=specifications['align'], label=specifications['label'], title=specifications['title'], titlefont=specifications['titlefont'], xlabel=specifications['xlabel'], xlabelfontsize=specifications['xlabelfontsize'], ylabel=specifications['ylabel'], ylabelfontsize=specifications['ylabelfontsize'], xticklabels=specifications['xticklabels'], xtickrange=specifications['xtickrange'], color=specifications['colors'], width=specifications['width'], legend=specifications['legend'], legendsize=specifications['legendsize'], xlim=specifications['xlim'], ylim=specifications['ylim'], xscale=specifications['xscale'], yscale=specifications['yscale'])
         
         if (plot_type == MPLPlot.basic_scatter):
             self.basic_scatter(self.axs[row, col], specifications['x'], specifications['y'], title = specifications['title'], titlefont = specifications['titlefont'], label = specifications['label'], xlabel = specifications['xlabel'], xlabelfontsize = specifications['xlabelfontsize'], ylabel = specifications['ylabel'], ylabelfontsize = specifications['ylabelfontsize'], xlim = specifications['xlim'], ylim = specifications['ylim'], xscale = specifications['xscale'], yscale = specifications['yscale'], xticklabels = specifications['xticklabels'], xtickrange=specifications['xtickrange'], color = specifications['color'],  legend = specifications['legend'], legendsize = specifications['legendsize'] )
@@ -232,7 +224,7 @@ class MPLPlot():
 
         return
 
-    def basic_bar(self, ax, data, height, bottom, align, label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabels = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6, xlim=(None,None), ylim=(None,None), xscale='linear', yscale='linear'):
+    def basic_bar(self, ax, height, bottom = 0, align = 'center', label=None, title = '', titlefont = 8, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8,  xticklabels = None, xtickrange = None, color = None, width = 0.5, legend = False, legendsize = 6, xlim=(None,None), ylim=(None,None), xscale='linear', yscale='linear'):
         
         # Transpose height input
         row = height.T
@@ -240,10 +232,18 @@ class MPLPlot():
         # Create horizontal axis
         x = np.arange(len(height))
 
+
         ## Create Plot
 
         # Plot Bar Data
-        ax.bar(x, row, label=label, color=color, width=width, bottom=bottom, align=align)
+        if (row.ndim > 1):
+            for i in range(row.shape[0]):
+                ax.bar((x-.237)+i*.12, row[i], label=label, color=color, width=width, bottom=bottom, align=align)
+        else:
+            ax.bar(x, row, label=label, color=color, width=width, bottom=bottom, align=align)
+
+
+
         ax.set_title(title, fontsize=titlefont)
         ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
         ax.set_ylabel(ylabel, fontsize=ylabelfontsize)
@@ -254,7 +254,7 @@ class MPLPlot():
 
         #Format xticks :skull_emoji:
         if xtickrange is None:
-            xtickrange = range(height.shape[0])
+            xtickrange = range(height.shape[1])
             ax.set_xticks(xtickrange)
             if xticklabels is not None:
                 ax.set_xticklabels(xticklabels)
@@ -276,11 +276,18 @@ class MPLPlot():
     def basic_scatter(self, ax, x, y, title = '', titlefont = 8, label = None, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8, xlim = (None, None), ylim = (None, None), xscale='linear', yscale='linear', xticklabels = None, xtickrange = None, color = None,  legend = False, legendsize = 6):
 
         ## Create Plot
-        
+
+        ## We forsake the multiple x-axis >:D          
+        # if (isinstance(x, list) and isinstance(y, np.ndarray)):
+        #     x = np.array([x for z in range(y.ndim)])
+
         #Plot Scatter Data
-        for i in range(len(x)):
-            print(i, label)
-            ax.scatter(x[i], y[i], label=label[i], color=color[i])
+        if (isinstance(x, np.ndarray) or isinstance(y, np.ndarray)):
+            for i in range(y.ndim):
+                ax.scatter(x, y[i], label=label[i], color=color[i])
+        else:
+            ax.scatter(x, y, label=label, color=color)
+    
         ax.set_title(title, fontsize=titlefont)
         ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
         ax.set_ylabel(ylabel, fontsize=ylabelfontsize)
@@ -291,12 +298,15 @@ class MPLPlot():
 
         #Format xticks :skull_emoji:
         if xtickrange is None:
-            pass
+            xtickrange = range(len(x))
+            ax.set_xticks(xtickrange)
+            if xticklabels is not None:
+                ax.set_xticklabels(xticklabels)
+            else:
+                ax.set_xticklabels([x for x in range(len(x))]) 
         else:
             ax.set_xticks(xtickrange)
             if xticklabels is not None:
-                print(xtickrange)
-                print(xticklabels)
                 ax.set_xticklabels(xticklabels)
             else:
                 ax.set_xticklabels([x for x in range(len(x))]) 
@@ -304,16 +314,23 @@ class MPLPlot():
         ## Add Legend
         if legend:
             ax.legend(fontsize = legendsize)
+
         return
 
     def basic_plot(self, ax, x, y, title = '', titlefont = 8, label = None, xlabel = '', xlabelfontsize = 8, ylabel = '', ylabelfontsize = 8, xlim = (None, None), ylim = (None, None), xscale='linear', yscale='linear', xticklabels = None, xtickrange = None, color = None,  legend = False, legendsize = 6):
-
         ## Create Plot
-        
+
+        ## We forsake the multiple x-axis >:D          
+        # if (isinstance(x, list) and isinstance(y, np.ndarray)):
+        #     x = np.array([x for z in range(y.ndim)])
+
         #Plot Scatter Data
-        for i in range(len(x)):
-            print(i, label)
-            ax.plot(x[i], y[i], label=label[i], color=color[i])
+        if (isinstance(x, np.ndarray) or isinstance(y, np.ndarray)):
+            for i in range(y.ndim):
+                ax.plot(x, y[i], label=label[i], color=color[i])
+        else:
+            ax.plot(x, y, label=label, color=color)
+
         ax.set_title(title, fontsize=titlefont)
         ax.set_xlabel(xlabel, fontsize=xlabelfontsize)
         ax.set_ylabel(ylabel, fontsize=ylabelfontsize)
@@ -324,12 +341,15 @@ class MPLPlot():
 
         #Format xticks :skull_emoji:
         if xtickrange is None:
-            pass
+            xtickrange = range(len(x))
+            ax.set_xticks(xtickrange)
+            if xticklabels is not None:
+                ax.set_xticklabels(xticklabels)
+            else:
+                ax.set_xticklabels([x for x in range(len(x))]) 
         else:
             ax.set_xticks(xtickrange)
             if xticklabels is not None:
-                print(xtickrange)
-                print(xticklabels)
                 ax.set_xticklabels(xticklabels)
             else:
                 ax.set_xticklabels([x for x in range(len(x))]) 
@@ -337,59 +357,8 @@ class MPLPlot():
         ## Add Legend
         if legend:
             ax.legend(fontsize = legendsize)
+            
         return
 
-    def show(self):
+    def show(self, toolbar=True):
         plt.show()
-
-
-
-
-    # Nowwwww I will
-        # Add axis limiting (y-scale) functionality DONE
-            #   ax.set_xlim(-.5, 4.5) DONE
-            #    ax.set_ylim(50, 220) DONE
-        # Add centering functionality DONE 
-        # Fix 1x1, nx1, and 1xn plots :skull_emoji: DONE 💀
-        # Add Scatter functionality To-Do DONE
-        # Add Line graph functionality To-Do
-
-
-
-
-def main():
-    """Goal
-    Create plots of all the data
-    Calculate the Mean and Standard Deviation
-    Run a Hypothesis Test on Null: There is a correlation between height and speed
-    """
-
-    # Import data
-    data = pd.read_csv("files/csvsets/Ece30Asgn1Data.csv")
-
-    # Create MPLPlot
-    myplot = MPLPlot(is_multiplot=True, dim=(5,1))
-
-    # Add Plots
-    myplot.add_plot(MPLPlot.basic_bar, data=data, height=data.AvgTime, title="Average Time Baisc Unformated Plot")
-    myplot.add_plot(MPLPlot.basic_bar, data=data, height=data.AvgTime, label=data.Name, title="Average Effect of Stride Length (cm) on Travel Time (s)", xlabel="Participants", ylabel="Time (seconds)", xticklabels=data.Name, colors=['#ff6d01', '#abed9b', '#5546ea', '#fbbd05', '#cc0100'], width=0.5, legend=True, legendsize=6)
-    
-    myplot.insert_plot(MPLPlot.basic_bar, 5, data=data, height=data.AvgVelocity)
-    myplot.insert_plot(MPLPlot.basic_bar, 1, data=data, height=data.AvgVelocity, colors='yellow')
-    myplot.insert_plot(MPLPlot.basic_bar, 1, data=data, height=data.AvgVelocity, colors='magenta')
-    myplot.insert_plot(MPLPlot.basic_bar, 1, data=data, height=data.AvgVelocity, colors='brown')
-
-
-    # myplot.add_plot(MPLPlot.basic_bar, data=data, height=data.AvgStrides, title="Average Strides Basic Plot", colors='red')
-    # myplot.add_plot(MPLPlot.basic_bar, data=data, height=data.AvgVelocity, title="Average Velocity Basic Plot", colors='purple')
-    # myplot.add_plot(MPLPlot.basic_bar, data=data, height=data.T2Velocity, title="Trial 2 Velocity", xlabel="Who's the fastest?", colors='green')
-
-
-
-    #MPLPlot.show()
-    myplot.show()
-
-
-
-if __name__ == "__main__":
-    main()
