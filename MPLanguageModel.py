@@ -3,7 +3,7 @@ from math import *
 import collections as clt
 
 
-class LM():
+class LanguageModel():
 
     def tokenize(self, train_file):            
 
