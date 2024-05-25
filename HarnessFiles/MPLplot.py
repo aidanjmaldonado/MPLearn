@@ -272,6 +272,7 @@ class MPLPlot():
         #Format xticks :skull_emoji:
         if xtickrange is None:
             print("bruhhh")
+            ax.set_xticklabels(["0", "1/3", "1/2", "2/3", "1"])
             # xtickrange = range(height.shape[1])
             # ax.set_xticks(xtickrange)
             # if xticklabels is not None:
@@ -381,6 +382,10 @@ class MPLPlot():
 
         #Format xticks :skull_emoji:
         if xtickrange is None:
+            print("This one papi", xticklabels)
+            xtickrange=[0,0.3, 0.5, 0.6, 1]
+            ax.set_xticklabels(["0", "0", "1/3", "1/3", "2/3", "1'"])
+            # ax.set_xticklabels(xticklabels)
             # xtickrange = range(len(x))
             # ax.set_xticks(xtickrange)
             # if xticklabels is not None:
@@ -391,8 +396,10 @@ class MPLPlot():
         else:
             ax.set_xticks(xtickrange)
             if xticklabels is not None:
+
                 ax.set_xticklabels(xticklabels)
             else:
+            
                 ax.set_xticklabels([x for x in range(len(x))]) 
 
         ## Add Legend

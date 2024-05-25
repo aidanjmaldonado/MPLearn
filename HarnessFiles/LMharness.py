@@ -4,25 +4,37 @@ from MPLanguageModel import *
 
 def main():
 
-    # Data to be tokenized
-    # training = ['./A2-Data/1b_benchmark.train.tokens', './A2-Data/small.train.tokens', './A2-Data/smaller.train.tokens']
-    training = ['./A2-Data/1b_benchmark.train.tokens', './A2-Data/myfile.tokens', './A2-Data/smaller.train.tokens']
-    training_data = training[0]
+    # Data to be trained
+    train_data = "./A2-Data/1b_benchmark.train.tokens"
+
+    # Dev Data
+    dev_data = "./A2-Data/1b_benchmark.dev.tokens"
 
     # Data to be tested
-    testing_data = "./A2-Data/1b_benchmark.test.tokens"
-    # testing_data = training[1]
+    test_data = "./A2-Data/1b_benchmark.test.tokens"
 
-    # Initialize an N-Graph and Alpha
-    n = 1
-    alpha = 1e-10
+    # Initialize an N-Gram and Alpha
+    n = 3
+    # alpha = 1e-10
+    alpha = 0.0001
     LM = N_Gram(n, alpha)
 
-    # Train the Unigram on the training data
-    LM.train(training_data)
+    # Train the Unigram on the Training Data
+    print("Training {}-gram...".format(n))
+    LM.train(train_data)
+    print("Done\n")
 
-    # Test the trained Unigram on the testing data
-    print("{}-gram, alpha = {}         :-=-=:         Perplexity = {}".format(n, alpha, LM.test(testing_data)))
+        # Test the trained Unigram on the Dev Data
+    print(f"Testing {n}-gram, alpha = {alpha} on Training Data...")
+    print(f"Perplexity = {LM.test(train_data)}\n")
+
+     # Test the trained Unigram on the Dev Data
+    print(f"Testing {n}-gram, alpha = {alpha} on Dev Data...")
+    print(f"Perplexity = {LM.test(dev_data)}\n")
+
+    # Test the trained Unigram on the Testing Data
+    print("Testing {}-gram, alpha = {} on Test Data...".format(n, alpha))
+    print(f"Perplexity = {LM.test(test_data)}\n")
 
 
 
