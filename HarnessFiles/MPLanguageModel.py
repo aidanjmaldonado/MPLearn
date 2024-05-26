@@ -12,7 +12,6 @@ class LM():
         with open(train_file, 'r') as f:
             sentences = f.readlines()
 
-
         # Count each token
         self.token_occurences = clt.Counter()
         self.vocabulary = set()
@@ -27,9 +26,6 @@ class LM():
             # Remove punctuation and newline
             sentences[x] = sentence.split()
 
-            # Append "Stop" to end of each sentence
-            sentences[x].append(stop)
-
             # Update the number of token occurences
             self.token_occurences.update(sentences[x])
 
@@ -39,15 +35,15 @@ class LM():
 
         # Replace uncommon words with <UNK>
         for x, sentence in enumerate(sentences):
+
+            # Replace uncommons with Unique
             sentences[x] = [token if self.token_occurences[token] >= 3 else unique for token in sentence]
+
+            # Append "Stop" to end of each sentence
+            sentences[x].append(stop)
         
         # Store the processed text
         self.updated_text = sentences
-
-        # Finished
-        return
-
-    def probabilities(self):
 
         # Define a Start token, prepend to each sentence
         numstart = self.n - 1
@@ -56,6 +52,11 @@ class LM():
             for x in enumerate(self.updated_text):
                 for y in range(numstart):
                     self.updated_text[x[0]].insert(0, start) 
+
+        # Finished
+        return
+
+    def probabilities(self):
 
         ##  Count the number of *unique* n-grams
             
@@ -106,7 +107,6 @@ class LM():
         with open(test_data, 'r') as f:
             sentences = f.readlines()
 
-
         # Count each token
         self.test_token_occurences = clt.Counter()
 
@@ -120,47 +120,57 @@ class LM():
             # Remove punctuation and newline
             sentences[x] = sentence.split()
 
-            # Append "Stop" to end of each sentence
-            sentences[x].append(stop)
-
             # Update the number of token occurences
             self.test_token_occurences.update(sentences[x])
 
-
-        # Replace uncommon and newfound words with <UNK>
+        # Replace uncommon words with <UNK>
         for x, sentence in enumerate(sentences):
-            sentences[x] = [token if (self.test_token_occurences[token] >= 3 or token in self.vocabulary) else unique for token in sentence]
+
+            # Replace uncommons with Unique
+            sentences[x] = [token if self.test_token_occurences[token] >= 3 else unique for token in sentence]
+
+            # Append "Stop" to end of each sentence
+            sentences[x].append(stop)
         
         # Store the processed text
         self.test_updated_text = sentences
 
         # Define a Start token, prepend to each sentence
-        # numstart = self.n - 1
-        # start = "<START>"
-        # if numstart > 0:
-        #     for x in enumerate(self.test_updated_text):
-        #         for y in range(numstart):
-        #             self.test_updated_text[x[0]].insert(0, start) 
+        numstart = self.n - 1
+        start = "<START>"
+        if numstart > 0:
+            for x in enumerate(self.test_updated_text):
+                for y in range(numstart):
+                    self.test_updated_text[x[0]].insert(0, start) 
 
         ## Now we are finished tokenizing
 
         # Initialize Sentence Probabilities: "What's the probability of this whole sentence occuring?" Use log probability
         self.sentence_probabilities = []
 
+        numtokens = 0
+        numsentences = 0
+
         # Iterate over every sentence; each one has a separate probability, take the log of each sentences' probability
         for i, sentence in enumerate(self.test_updated_text):
-            product_of_gram_probs = 1
+            sum_of_log_gram_probs = 0
             
             # Grab every n-gram from each sentence and add their probabilities into temp
             for word_index in range(len(sentence) - (self.n - 1)):
                 prefix = tuple(sentence[word_index:word_index + (self.n - 1)])
                 suffix = sentence[word_index + (self.n - 1)]
                 
-                # Sum the probability of every (prefix & suffix) in the sentence
-                product_of_gram_probs *= self.gram_probabilities[prefix][suffix] if self.gram_probabilities[prefix][suffix] > 0 else self.gram_probabilities[prefix][suffix] + self.alpha
+                # Sum the log probabilities of every (prefix & suffix) in the sentence
+                sum_of_log_gram_probs += log2(self.gram_probabilities[prefix][suffix]) if self.gram_probabilities[prefix][suffix] > 0 else log2(self.gram_probabilities[prefix][suffix] + self.alpha)
+                
+                # Tally number of tokens
+                numtokens += 1
             
             # Take the exponent of the log sum to achieve sentence probability
-            self.sentence_probabilities.append(log2(product_of_gram_probs + self.alpha))
+            self.sentence_probabilities.append(sum_of_log_gram_probs)
+
+            # Tally number of sentences
+            numsentences += 1
 
 
         # Total number of words in corpus
@@ -169,9 +179,11 @@ class LM():
 
             for word in sentence:
                 numwords += 1
+
+        self.total_probability = sum(self.sentence_probabilities)
         
         # Calculate Perplexity
-        perplexity = 2 ** (-sum(self.sentence_probabilities) / numwords)
+        perplexity = 2 ** (-(self.total_probability) / numwords)
         
         # Finished
         return perplexity
@@ -181,7 +193,8 @@ class LM():
 class N_Gram(LM):
     def __init__(self, n=1, alpha=0):
         self.n = n if n > 0 else 1
-        self.alpha = alpha if (alpha > 0 and alpha < 1) else 0
+        self.alpha = alpha if (alpha > 0 and alpha < 1) else 1e-10
+
 
     def train(self, train_data):
 
