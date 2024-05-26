@@ -1,13 +1,11 @@
 from MPLanguageModel import *
-import sys
-
 
 
 def main():
 
     # Data to be trained
     train_data = "./A2-Data/1b_benchmark.train.tokens"
-    # train_data = "./A2-Data/short.train.tokens"
+    # train_data = "./A2-Data/myfile.train.tokens"
 
     # Dev Data
     dev_data = "./A2-Data/1b_benchmark.dev.tokens"
@@ -18,40 +16,43 @@ def main():
     # test_data = "./A2-Data/short.test.tokens"
 
 
-    # Initialize N-Gram Models and Alpha
-    # alpha = 1e-10
-    alpha = 0.01 # Larger alpha works better for this large of a dataset
+    ### Initialize N-Gram Models and Alpha
+    alpha = 1e-10
+    # alpha = .001 # Larger alpha works better for this large of a dataset
 
-    """
-    n = 1
+    # 12 Gram Model
+    n = 12
     LM = N_Gram(n, alpha)
-    """
 
+    # Uni Gram Model
     Uni = N_Gram(1, alpha)
+
+    # Bi Gram Model
     Bi = N_Gram(2, alpha)
+
+    # Tri Gram Model
     Tri = N_Gram(3, alpha)
 
-    """
+    
     ## N-Gram showcase
     print("\n\n-=-=-=-=- N-Gram Showcase -=-=-=-=-\n")
 
     # Train the N-Gram on the Training Data
-    print("Training {}-gram...".format(n))
+    print("Training n = {}-gram...".format(n))
     LM.train(train_data)
     print("Done\n")
 
     # Test the trained N-Gram on the Dev Data
-    print(f"Testing {n}-gram, alpha = {alpha} on Training Data...")
+    print(f"Testing n = {n}-gram, alpha = {alpha} on Training Data...")
     print(f"Perplexity = {LM.test(test_data)}\n")
 
      # Test the trained N-Gram on the Dev Data
-    print(f"Testing {n}-gram, alpha = {alpha} on Dev Data...")
+    print(f"Testing n = {n}-gram, alpha = {alpha} on Dev Data...")
     print(f"Perplexity = {LM.test(dev_data)}\n")
 
     # Test the trained N-Gram on the Testing Data
-    print("Testing {}-gram, alpha = {} on Test Data...".format(n, alpha))
+    print("Testing n = {}-gram, alpha = {} on Test Data...".format(n, alpha))
     print(f"Perplexity = {LM.test(test_data)}\n")
-    """
 
 
     ## Uni-Gram showcase
@@ -110,7 +111,7 @@ def main():
 
      # Test the trained Tri-Gram on the Dev Data
     print(f"Testing {3}-gram, alpha = {alpha} on Dev Data...")
-    print(f"Perplexity = {Tri.test(dev_data)}\n")
+    print(f"Perplexity = {Tri.test(test_data)}\n")
 
     # Test the trained Tri-Gram on the Testing Data
     print("Testing {}-gram, alpha = {} on Test Data...".format(3, alpha))
