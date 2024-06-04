@@ -1,6 +1,5 @@
 from MPLanguageModel import *
 
-
 def main():
 
     # Data to be trained
@@ -14,110 +13,107 @@ def main():
     # Data to be tested
     test_data = "./A2-Data/1b_benchmark.test.tokens"
     # test_data = "./A2-Data/short.test.tokens"
+    # test_data = "./A2-Data/myfile.train.tokens"
 
 
-    ### Initialize N-Gram Models and Alpha
-    alpha = 1e-10
-    # alpha = .001 # Larger alpha works better for this large of a dataset
 
-    # 12 Gram Model
-    n = 12
-    LM = N_Gram(n, alpha)
+    ### Initialize N-Gram Models
 
     # Uni Gram Model
-    Uni = N_Gram(1, alpha)
+    Uni = N_Gram(1, alpha=1e-8)
 
     # Bi Gram Model
-    Bi = N_Gram(2, alpha)
+    Bi = N_Gram(2, alpha=1e-8)
 
     # Tri Gram Model
-    Tri = N_Gram(3, alpha)
+    Tri = N_Gram(3, alpha=1e-8)
 
+    # Quad Gram Model
+    Quad = N_Gram(4, alpha=1e-8)
     
-    ## N-Gram showcase
-    print("\n\n-=-=-=-=- N-Gram Showcase -=-=-=-=-\n")
+    # Penta Gram Model
+    Penta = N_Gram(5, alpha=1e-8)
 
-    # Train the N-Gram on the Training Data
-    print("Training n = {}-gram...".format(n))
-    LM.train(train_data)
-    print("Done\n")
-
-    # Test the trained N-Gram on the Dev Data
-    print(f"Testing n = {n}-gram, alpha = {alpha} on Training Data...")
-    print(f"Perplexity = {LM.test(test_data)}\n")
-
-     # Test the trained N-Gram on the Dev Data
-    print(f"Testing n = {n}-gram, alpha = {alpha} on Dev Data...")
-    print(f"Perplexity = {LM.test(dev_data)}\n")
-
-    # Test the trained N-Gram on the Testing Data
-    print("Testing n = {}-gram, alpha = {} on Test Data...".format(n, alpha))
-    print(f"Perplexity = {LM.test(test_data)}\n")
+    # Fifty Gram Model (Overkill)
+    Fifty = N_Gram(5, alpha=1e-8)
 
 
-    ## Uni-Gram showcase
-    print("\n\n-=-=-=-=- Uni-Gram Showcase -=-=-=-=-\n")
 
-    # Train the Uni-Gram on the Training Data
-    print("Training {}-gram...".format(1))
+    print(f"\n\n    -----   Showcase Without Linear Interpolation  -----   ")
+    print(f"\nUni-Gram Perplexity:")
     Uni.train(train_data)
-    print("Done\n")
+    print(f"Train: {Uni.perplexity(train_data)}")
+    print(f"Dev:   {Uni.perplexity(dev_data)}")
+    print(f"Test:  {Uni.perplexity(test_data)}")
 
-    # Test the trained Uni-Gram on the Dev Data
-    print(f"Testing {1}-gram, alpha = {alpha} on Train Data...")
-    print(f"Perplexity = {Uni.test(train_data)}\n")
-
-     # Test the trained Uni-Gram on the Dev Data
-    print(f"Testing {1}-gram, alpha = {alpha} on Dev Data...")
-    print(f"Perplexity = {Uni.test(dev_data)}\n")
-
-    # Test the trained Uni-Gram on the Testing Data
-    print("Testing {}-gram, alpha = {} on Test Data...".format(1, alpha))
-    print(f"Perplexity = {Uni.test(test_data)}\n")
-
-
-    ## Bi-Gram showcase
-    print("\n\n-=-=-=-=- Bi-Gram Showcase -=-=-=-=-\n")
-
-    # Train the Bi-Gram on the Training Data
-    print("Training {}-gram...".format(2))
+    print(f"\nBi-Gram Perplexity:")
     Bi.train(train_data)
-    print("Done\n")
+    print(f"Train: {Bi.perplexity(train_data)}")
+    print(f"Dev:   {Bi.perplexity(dev_data)}")
+    print(f"Test:  {Bi.perplexity(test_data)}")
 
-    # Test the trained N-Gram on the Dev Data
-    print(f"Testing {2}-gram, alpha = {alpha} on Train Data...")
-    print(f"Perplexity = {Bi.test(train_data)}\n")
-
-     # Test the trained N-Gram on the Dev Data
-    print(f"Testing {2}-gram, alpha = {alpha} on Dev Data...")
-    print(f"Perplexity = {Bi.test(dev_data)}\n")
-
-    # Test the trained N-Gram on the Testing Data
-    print("Testing {}-gram, alpha = {} on Test Data...".format(2, alpha))
-    print(f"Perplexity = {Bi.test(test_data)}\n")
-
-
-    ## Tri-Gram showcase
-    print("\n\n-=-=-=-=- Tri-Gram Showcase -=-=-=-=-\n")
-
-    # Train the Tri-Gram on the Training Data
-    print("Training {}-gram...".format(3))
+    print(f"\nTri-Gram Perplexity:")
     Tri.train(train_data)
-    print("Done\n")
+    print(f"Train: {Tri.perplexity(train_data)}")
+    print(f"Dev:   {Tri.perplexity(dev_data)}")
+    print(f"Test:  {Tri.perplexity(test_data)}")
 
-    # Test the trained Tri-Gram on the Dev Data
-    print(f"Testing {3}-gram, alpha = {alpha} on Train Data...")
-    print(f"Perplexity = {Tri.test(train_data)}\n")
+    print(f"\nQuad-Gram Perplexity:")
+    Quad.train(train_data)
+    print(f"Train: {Quad.perplexity(train_data)}")
+    print(f"Dev:   {Quad.perplexity(dev_data)}")
+    print(f"Test:  {Quad.perplexity(test_data)}")
 
-     # Test the trained Tri-Gram on the Dev Data
-    print(f"Testing {3}-gram, alpha = {alpha} on Dev Data...")
-    print(f"Perplexity = {Tri.test(test_data)}\n")
+    print(f"\nPenta-Gram Perplexity:")
+    Penta.train(train_data)
+    print(f"Train: {Penta.perplexity(train_data)}")
+    print(f"Dev:   {Penta.perplexity(dev_data)}")
+    print(f"Test:  {Penta.perplexity(test_data)}")
 
-    # Test the trained Tri-Gram on the Testing Data
-    print("Testing {}-gram, alpha = {} on Test Data...".format(3, alpha))
-    print(f"Perplexity = {Tri.test(test_data)}\n")
+    # print(f"\nFifty-Gram Perplexity:")
+    # Fifty.train(train_data)
+    # print(f"Train: {Fifty.perplexity(train_data)}")
+    # print(f"Dev:   {Fifty.perplexity(dev_data)}")
+    # print(f"Test:  {Fifty.perplexity(test_data)}")
 
-    
+
+
+    print(f"\n\n    -----   Showcase With Linear Interpolation  -----   ")
+    print(f"\nUni-Gram Perplexity::")
+    Uni.train(train_data, interpolation=True, lambdas=[1.0])
+    print(f"Train: {Uni.perplexity(train_data)}")
+    print(f"Dev:   {Uni.perplexity(dev_data)}")
+    print(f"Test:  {Uni.perplexity(test_data)}")
+
+    print(f"\nBi-Gram Perplexity::")
+    Bi.train(train_data, interpolation=True, lambdas=[0.3, 0.7])
+    print(f"Train: {Bi.perplexity(train_data)}")
+    print(f"Dev:   {Bi.perplexity(dev_data)}")
+    print(f"Test:  {Bi.perplexity(test_data)}")
+
+    print(f"\nTri-Gram Perplexity::")
+    Tri.train(train_data, interpolation=True, lambdas=[0.1, 0.3, 0.6])
+    print(f"Train: {Tri.perplexity(train_data)}")
+    print(f"Dev:   {Tri.perplexity(dev_data)}")
+    print(f"Test:  {Tri.perplexity(test_data)}")
+
+    print(f"\nQuad-Gram Perplexity::")
+    Quad.train(train_data, interpolation=True, lambdas=[0.2, 0.2, 0.3, 0.3])
+    print(f"Train: {Quad.perplexity(train_data)}")
+    print(f"Dev:   {Quad.perplexity(dev_data)}")
+    print(f"Test:  {Quad.perplexity(test_data)}")
+
+    print(f"\nPenta-Gram Perplexity::")
+    Penta.train(train_data, interpolation=True, lambdas=[0.1, 0.2, 0.2, 0.2, 0.3])
+    print(f"Train: {Penta.perplexity(train_data)}")
+    print(f"Dev:   {Penta.perplexity(dev_data)}")
+    print(f"Test:  {Penta.perplexity(test_data)}")
+
+    # print(f"\Fifty-Gram Perplexity::")
+    # Fifty.train(train_data, interpolation=True, lambdas=[0.1, 0.2, 0.2, 0.2, 0.3])
+    # print(f"Train: {Fifty.perplexity(train_data)}")
+    # print(f"Dev:   {Fifty.perplexity(dev_data)}")
+    # print(f"Test:  {Fifty.perplexity(test_data)}")
 
 
 

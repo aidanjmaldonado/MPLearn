@@ -1,4 +1,3 @@
-import numpy as np 
 from math import *
 import collections as clt
 
@@ -82,45 +81,77 @@ class LanguageModel():
         return
     
 
-    def probabilities(self):
+    def probabilities(self, interpolation, lambdas, context):
         ##  Count the number of *unique* n-grams
-            
-        # Initialize vars
-        prefex = tuple()
-        suffix = ""
-        self.unique_n_grams = clt.defaultdict(clt.Counter)
 
+        # Initialize Unique Grams Counters
+        if (context == 1) or (interpolation == False):
+            self.unique_n_grams = [clt.defaultdict(clt.Counter) for x in range(self.n)] if interpolation else  clt.defaultdict(clt.Counter)
+        
         # Loop through every word/sentence in the updated text
         for sentence_num, sentence in enumerate(self.updated_text):
-            for word_index in range(len(sentence) - (self.n - 1)):
+            for word_index in range(context - 1, len(sentence)):
 
                 # Grab the Prefix and Suffix of N-Gram
-                prefix = tuple(sentence[word_index:word_index + (self.n - 1)])
-                suffix = sentence[word_index + (self.n - 1)]
+                prefix = tuple(sentence[(word_index - (context - 1)):word_index])
+                suffix = sentence[word_index]
+                if suffix == '<START>':
+                    continue
 
                 # Update the Unique N-Grams dictionary
-                self.unique_n_grams[prefix][suffix] += 1
+                if interpolation:
+                    self.unique_n_grams[context - 1][prefix][suffix] += 1
+                else:
+                    self.unique_n_grams[prefix][suffix] += 1
         
         ## Math time!
-        
+                
         # Initialize gram probabilities: "What's the Probability that 'Suffix' occurs given 'Prefix'?" This is count(prefix & suffix) / count(prefix)
-        self.gram_probabilities = clt.defaultdict(lambda: clt.defaultdict(float))
-        ##### TO-DO: Interpolation
+        if (context == 1) or (interpolation == False):
+            self.gram_probabilities = [clt.defaultdict(lambda: clt.defaultdict(float)) for x in range(self.n)] if interpolation else clt.defaultdict(lambda: clt.defaultdict(float))
 
         # Loop over every prefix 
-        for n_gram_prefix in self.unique_n_grams:
+        unique_context_grams = (self.unique_n_grams[context - 1] if interpolation else self.unique_n_grams)
+        context_gram_probabilities = clt.defaultdict(lambda: clt.defaultdict(float))
+        if not interpolation:
+            lambdas = [1 for x in range(self.n)]
+        context_alpha = 0 if interpolation else self.alpha
+
+
+        for n_gram_prefix in unique_context_grams:
 
             # Denominator = the number of times the prefix occurs
-            denominator = sum(self.unique_n_grams[n_gram_prefix].values())
+            denominator = sum(unique_context_grams[n_gram_prefix].values())
 
             # Loop over every suffix combination
-            for n_gram_suffix in self.unique_n_grams[n_gram_prefix].keys():
+            for n_gram_suffix in unique_context_grams[n_gram_prefix].keys():
 
                 # Numerator = the number of times the given suffix occurs with the prefix
-                numerator = self.unique_n_grams[n_gram_prefix][n_gram_suffix]
+                numerator = unique_context_grams[n_gram_prefix][n_gram_suffix]
 
-                # Compute gram probability, add alpha for smoothing
-                self.gram_probabilities[n_gram_prefix][n_gram_suffix] = ((numerator + self.alpha) / (denominator + ((len(self.vocabulary) * self.alpha))))
+                # Compute gram probability, add alpha for smoothing and multiply by lambda weight if Linear Interpolation is applicable
+                context_gram_probabilities[n_gram_prefix][n_gram_suffix] += (((numerator + context_alpha) / (denominator + ((len(self.vocabulary) * context_alpha)))) * lambdas[context - 1])
+
+
+        if interpolation:
+            self.gram_probabilities[context - 1] = context_gram_probabilities
+        else:
+            self.gram_probabilities = context_gram_probabilities
+
+        # Recurr if using Linear Interpolation to gather weighted sum of probabilities across all contexts
+        if context < (self.n) and interpolation:
+            LanguageModel.probabilities(self, interpolation, lambdas, context + 1)
+
+        # Aggregate all lower-order probabilities in the event of Linear Interpolation
+        if interpolation and context == (self.n):
+            for n_gram_prefix in unique_context_grams:
+                for n_gram_suffix in unique_context_grams[n_gram_prefix]:
+                    for n in range(self.n-1):
+                        self.gram_probabilities[context - 1][n_gram_prefix][n_gram_suffix] += (self.gram_probabilities[n][n_gram_prefix[self.n - (n+1):]][n_gram_suffix])
+    
+        
+            # Finalize
+            self.gram_probabilities = self.gram_probabilities[context - 1]
 
         # Finished
         return
@@ -172,6 +203,7 @@ class LanguageModel():
                     self.test_token_occurences[start] += 1
 
         ## Now we are finished tokenizing
+        # print(self.test_updated_text)
 
         # Initialize Sentence Probabilities: "What's the probability of this whole sentence occuring?" Use log probability
         self.sentence_probabilities = []
@@ -202,7 +234,7 @@ class LanguageModel():
         self.total_probability = sum(self.sentence_probabilities)
         
         # Calculate Perplexity
-        perplexity = 2 ** ((-1 * self.total_probability) /(numwords - (self.n - 1)))
+        perplexity = 2 ** ((-self.total_probability)/(numwords - (self.n - 1)))
         
         # Finished
         return perplexity
@@ -210,16 +242,16 @@ class LanguageModel():
 
 class N_Gram(LanguageModel):
     def __init__(self, n=1, alpha=0):
-        self.n = n if n > 0 else 1
-        self.alpha = alpha if (alpha > 0 and alpha < 1) else 1e-10
+        self.n = n
+        self.alpha = alpha
 
-    def train(self, train_data):
+    def train(self, train_data, interpolation=False, lambdas=None):
 
-        # Tokenize the data
+        # Tokenize the input data and construct a vocabulary
         self.tokenize(train_data)
 
-        # Calculate the probabilities
-        self.probabilities()
+        # Calculate the probabilities with regards to specified context range
+        self.probabilities(interpolation, lambdas, 1 if interpolation else self.n)
         
     def test(self, test_data):
         
