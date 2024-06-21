@@ -111,7 +111,7 @@ class LanguageModel():
                         sentences[x][index] = "<UNK>"
 
                 # Append "Stop" to end of each sentence
-                if x != len(sentences)-1 or type == "Test":
+                if x != len(sentences)-1 and type == "Test":
                     sentences[x].append(stop)
             
             # Store the processed text
@@ -126,6 +126,7 @@ class LanguageModel():
                         self.test_updated_text[x[0]].insert(0, start) 
                         self.test_token_occurences[start] += 1
         # Finished
+        self.vocabulary_list = sorted(list(self.vocabulary))
         return
     
     def probabilities(self, interpolation, lambdas, context):
@@ -270,73 +271,74 @@ class Generator(LanguageModel):
         # self.n = N_Gram.n
         # self.voc
 
-    def vectorfill(self, starter, type="Greedy", top_k=1):
+    def vectorfill(self, starter, top_k=1, temperature=1):
         
         # Tokenize starting text
         self.tokenize(starter, "Generate")
-        self.vocabulary_list = sorted(list(self.vocabulary))
-
-        # print(self.test_updated_text)
-        # print(f"How long is our vocab? {len(self.vocabulary_list)}")
         
         # Finish off each sentence
-        new = ""
-        newvector = []
-        newprefix = ()
-        newprob = 0
-        for k, sentence in enumerate(self.test_updated_text):
-            if sentence[-1] == "<STOP>":
-                pass
-            else:
-                countz = 0
-                while new != "<STOP>":
-                    newprefix = tuple(sentence[-(self.n - 1):]) if self.n > 1 else ()
-                    # print(newprefix)
-                    if type == "Greedy":
-                        newvector = np.empty(len(self.vocabulary_list), dtype=float)
-                        maxindex = 0
-                        maxprob = 0
-                        for i, y in enumerate(self.vocabulary_list):
-                            newprob = self.gram_probabilities[newprefix][y]
-                            newvector[i] = newprob
-                            if newprob > maxprob:
-                                maxprob = newprob
-                                maxindex = i
-                        newprob = 0
-                        new = self.vocabulary_list[maxindex]
-                        self.test_updated_text[k].append(new)
-                    elif type == "Sample":
-                        if top_k == 1:
-                            maxindex = random.randint(0, len(self.vocabulary_list))
-                            new = self.vocabulary_list[maxindex]
-                            self.test_updated_text[k].append(new)
-                        else:
-                            kmax = [(float('inf'), float('inf'))]
-                            # print("Begin kmax")
-                            usedtokens = set()
-                            for p in range(top_k):
-                                newvector = np.empty(len(self.vocabulary_list), dtype=float)
-                                maxindex = 0
-                                maxprob = 0
-                                for i, y in enumerate(self.vocabulary_list):
-                                    newprob = self.gram_probabilities[newprefix][y]
-                                    newvector[i] = newprob
-                                    if newprob > maxprob and newprob <= kmax[-1][1] and y not in usedtokens:
-                                        maxprob = newprob
-                                        maxindex = i
+        for i, sentence in enumerate(self.test_updated_text):
 
-                                usedtokens.add(self.vocabulary_list[maxindex])
-                                kmax.append((maxindex, maxprob))
-                                newprob = 0
+            while self.test_updated_text[i][-1] != "<STOP>":
+                k_samples = [[float('inf'), float('inf')]]
+                new_prefix = tuple(self.test_updated_text[i][-(self.n - 1):]) if self.n > 1 else ()
 
-                            newindex = random.randint(1, top_k)
-                            new = self.vocabulary_list[kmax[newindex][0]]
-                            self.test_updated_text[k].append(new)
+                for k in range(top_k):
+                    greedy_word_info = self.greedy_word(new_prefix, k_samples[-1][0])
+                    if greedy_word_info[0] != 0:
+                        k_samples.append(greedy_word_info)
+
+                # Select next word from sample:
+                new_word_index = self.select_word(k_samples[1:], top_k, temperature)
+                new_word = self.vocabulary_list[new_word_index]
+
+                self.test_updated_text[i].append(new_word)
+            
+            # Yield the completed sentence
+            yield(" ".join(self.test_updated_text[i][self.n-1:-1]))
+
+    def greedy_word(self, prefix, ceiling=float('inf')):
+        newvector = [self.gram_probabilities[prefix][y] for y in self.vocabulary_list]
+        maxprob = 0
+        maxindex = -1
+        for i, prob in enumerate(newvector):
+            if prob > maxprob and prob < ceiling:
+                maxprob = prob
+                maxindex = i
+        return [maxprob, maxindex]
+    
+    def select_word(self, k_samples, top_k=1, temperature=1):
+
+        # Normalizing constant
+        normalizer = 0
+
+        for i in range(len((k_samples))):
+            
+            # Divide by temperature
+            k_samples[i][0] = k_samples[i][0] / temperature 
+
+            # Take the exponential
+            k_samples[i][0] = exp(k_samples[i][0])
+
+            # Increment the normalization constant
+            normalizer += k_samples[i][0]
+        
+        # Normalize every probability
+        for i in range(len(k_samples)):
+            k_samples[i][0] /= normalizer
+            # k_samples[i][1] = i
+
+        # Randomly pick from this weighted distribution
+        toarray = np.array(k_samples).T
+        index = random.choices(toarray[1], toarray[0], k=1)
+        
+        return int(index[0])
+            
 
 
 ## To-Do
 """
-class Generator
+class Generator DONE
 
 class NaiveBayes Predictor
 

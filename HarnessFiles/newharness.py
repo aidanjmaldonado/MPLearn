@@ -1,19 +1,26 @@
 import MPLanguageModel as mplm
 
-bi = mplm.N_Gram(2, 1e-10)
 
+# Input Data
 train_data = "./A2-Data/1b_benchmark.train.tokens"
-test_data = "./A2-Data/starter.txt"
+test_data = "./A2-Data/1b_benchmark.test.tokens"
+sentence_starters = "./A2-Data/starter.txt"
 
-print("Training Bigram")
+# Create an N-Gram Language Model
+bi = mplm.N_Gram(3, 1e-10)
+
+# Train the N-Gram Language Model
+print("\nTraining . . .")
 bi.train(train_data)
 
-print("Testing Bigram")
+# Test the Perplexity of the N-Gram Model
+print("\nTesting . . .")
 print(f"Perplexity: {bi.test(test_data)}")
 
-sentence_starter = "./A2-Data/starter.txt"
-print(f"\nUsing the sentence starter:\n      {sentence_starter}\n We are going to generate an end to this sentence.")
-
-# Create a Generator
+# Create a Text Generator
 textGen = mplm.Generator(bi)
-textGen.vectorfill(sentence_starter, "Sample", top_k=100)
+
+# Generate an end to each sentene in the input file
+print("\nGenerating . . .")
+for filled in textGen.vectorfill(sentence_starters, top_k=10, temperature = 0.01):
+    print(filled)
