@@ -2,8 +2,6 @@ from math import *
 import numpy as np
 import collections as clt
 import random
-import sys
-
 
 class LanguageModel():
 
@@ -330,8 +328,8 @@ class Generator(LanguageModel):
         
         # Normalize every probability
         for i in range(len(k_samples)):
+            
             k_samples[i][0] /= normalizer
-            # k_samples[i][1] = i
 
         # Randomly pick from this weighted distribution
         toarray = np.array(k_samples).T
