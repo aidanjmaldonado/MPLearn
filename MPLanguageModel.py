@@ -1,86 +1,134 @@
 from math import *
+import numpy as np
 import collections as clt
+import random
+import sys
 
 
 class LanguageModel():
 
-    def tokenize(self, train_file):            
+    def tokenize(self, input, type):            
+        if type == "Train":
+            # Read the file
+            with open(input, 'r') as f:
+                sentences = f.readlines()
 
-        # Read the file
-        with open(train_file, 'r') as f:
-            sentences = f.readlines()
+            # Count each token
+            self.token_occurences = clt.Counter()
+            self.vocabulary = set()
 
-        # Count each token
-        self.token_occurences = clt.Counter()
-        self.vocabulary = set()
+            # Create Stop and Unique tokens
+            stop = "<STOP>"
+            unique = "<UNK>"
 
-        # Create Stop and Unique tokens
-        stop = "<STOP>"
-        unique = "<UNK>"
+            # Tokenize the data, count the number of their occurences and build the vocabulary
+            for x, sentence in enumerate(sentences):
 
-        # Tokenize the data, count the number of their occurences and build the vocabulary
-        for x, sentence in enumerate(sentences):
+                # Remove punctuation and newline
+                sentences[x] = sentence.split()
 
-            # Remove punctuation and newline
-            sentences[x] = sentence.split()
+                # Append "Stop" to end of each sentence
+                sentences[x].append(stop)
 
-            # Append "Stop" to end of each sentence
-            sentences[x].append(stop)
+                # Update the number of token occurences
+                self.token_occurences.update(sentences[x])
 
-            # Update the number of token occurences
-            self.token_occurences.update(sentences[x])
-
-            # Update the vocabulary
-            self.vocabulary.update(sentences[x])
+                # Update the vocabulary
+                self.vocabulary.update(sentences[x])
 
 
-        ## Replace uncommon words with <UNK>
-    
-        # Initlize set of removed tokens to avoid double-removing
-        self.removed = set()
-
-        # Loop over sentences
-        for x, sentence in enumerate(sentences):
-
-            # Loop over words
-            for i, token in enumerate(sentence):
-
-                # If the word is not frequent and has not already been removed, remove it
-                if self.token_occurences[token] < 3:
-
-                    # Update the text
-                    sentences[x][i] = unique
-
-                    # Remove the token
-                    if token not in self.removed:
-                        self.vocabulary.remove(token)
-
-                        # Place the token in the "removed" set
-                        self.removed.add(token)
-
-                        # Add "Unique" to the vocabulary, at least once
-                        self.vocabulary.add(unique)
-                    
-                    # Increment the number of times UNK occurs
-                    self.token_occurences[unique] += 1
-            
+            ## Replace uncommon words with <UNK>
         
-        # Store the processed text
-        self.updated_text = sentences
+            # Initlize set of removed tokens to avoid double-removing
+            self.removed = set()
 
-        # Define a Start token, prepend to each sentence
-        numstart = self.n - 1
-        start = "<START>"
-        if numstart > 0:
-            for x in enumerate(self.updated_text):
-                for y in range(numstart):
-                    self.updated_text[x[0]].insert(0, start) 
-                    self.token_occurences[start] += 1
+            # Loop over sentences
+            for x, sentence in enumerate(sentences):
 
+                # Loop over words
+                for i, token in enumerate(sentence):
+
+                    # If the word is not frequent and has not already been removed, remove it
+                    if self.token_occurences[token] < 3:
+
+                        # Update the text
+                        sentences[x][i] = unique
+
+                        # Remove the token
+                        if token not in self.removed:
+                            self.vocabulary.remove(token)
+
+                            # Place the token in the "removed" set
+                            self.removed.add(token)
+
+                            # Add "Unique" to the vocabulary, at least once
+                            self.vocabulary.add(unique)
+                        
+                        # Increment the number of times UNK occurs
+                        self.token_occurences[unique] += 1
+                
+            
+            # Store the processed text
+            self.updated_text = sentences
+
+            # Define a Start token, prepend to each sentence
+            numstart = self.n - 1
+            start = "<START>"
+            if numstart > 0:
+                for x in enumerate(self.updated_text):
+                    for y in range(numstart):
+                        self.updated_text[x[0]].insert(0, start) 
+                        self.token_occurences[start] += 1
+
+        else:
+                ## Tokenize test_data
+            # Read the file
+            with open(input, 'r') as f:
+                sentences = f.readlines()
+
+            # Count each token
+            self.test_token_occurences = clt.Counter()
+
+            # Create Stop and Unique tokens
+            stop = "<STOP>"
+            unique = "<UNK>"
+
+            # Tokenize the data, count the number of their occurences and build the vocabulary
+            for x, sentence in enumerate(sentences):
+
+                # Remove punctuation and newline
+                sentences[x] = sentence.split()
+
+                # Update the number of token occurences
+                self.test_token_occurences.update(sentences[x])
+
+            # Replace uncommon words with <UNK>
+            for x, sentence in enumerate(sentences):
+
+                # Replace new words with UNK
+                for index, word in enumerate(sentence):
+                    if sentences[x][index] not in self.vocabulary:
+                        sentences[x][index] = "<UNK>"
+
+                # Append "Stop" to end of each sentence
+                if x != len(sentences)-1 and type == "Test":
+                    sentences[x].append(stop)
+            
+            # Store the processed text
+            self.test_updated_text = sentences
+
+            # Define a Start token, prepend to each sentence
+            numstart = self.n - 1
+            start = "<START>"
+            if numstart > 0:
+                for x in enumerate(self.test_updated_text):
+                    for y in range(numstart):
+                        self.test_updated_text[x[0]].insert(0, start) 
+                        self.test_token_occurences[start] += 1
         # Finished
+        self.vocabulary_list = sorted(list(self.vocabulary))
         return
     
-
     def probabilities(self, interpolation, lambdas, context):
         ##  Count the number of *unique* n-grams
 
@@ -156,54 +204,7 @@ class LanguageModel():
         # Finished
         return
     
-    def perplexity(self, test_data):
-
-        ## Tokenize test_data
-        # Read the file
-        with open(test_data, 'r') as f:
-            sentences = f.readlines()
-
-        # Count each token
-        self.test_token_occurences = clt.Counter()
-
-        # Create Stop and Unique tokens
-        stop = "<STOP>"
-        unique = "<UNK>"
-
-        # Tokenize the data, count the number of their occurences and build the vocabulary
-        for x, sentence in enumerate(sentences):
-
-            # Remove punctuation and newline
-            sentences[x] = sentence.split()
-
-            # Update the number of token occurences
-            self.test_token_occurences.update(sentences[x])
-
-        # Replace uncommon words with <UNK>
-        for x, sentence in enumerate(sentences):
-
-            # Replace new words with UNK
-            for index, word in enumerate(sentence):
-                if sentences[x][index] not in self.vocabulary:
-                    sentences[x][index] = "<UNK>"
-
-            # Append "Stop" to end of each sentence
-            sentences[x].append(stop)
-        
-        # Store the processed text
-        self.test_updated_text = sentences
-
-        # Define a Start token, prepend to each sentence
-        numstart = self.n - 1
-        start = "<START>"
-        if numstart > 0:
-            for x in enumerate(self.test_updated_text):
-                for y in range(numstart):
-                    self.test_updated_text[x[0]].insert(0, start) 
-                    self.test_token_occurences[start] += 1
-
-        ## Now we are finished tokenizing
-        # print(self.test_updated_text)
+    def perplexity(self):
 
         # Initialize Sentence Probabilities: "What's the probability of this whole sentence occuring?" Use log probability
         self.sentence_probabilities = []
@@ -248,12 +249,101 @@ class N_Gram(LanguageModel):
     def train(self, train_data, interpolation=False, lambdas=None):
 
         # Tokenize the input data and construct a vocabulary
-        self.tokenize(train_data)
+        self.tokenize(train_data, "Train")
 
         # Calculate the probabilities with regards to specified context range
         self.probabilities(interpolation, lambdas, 1 if interpolation else self.n)
         
     def test(self, test_data):
+        self.tokenize(test_data, "Test")
         
         # Calculate Perplexity
-        return self.perplexity(test_data)
+        return self.perplexity()
+    
+
+class Generator(LanguageModel):
+    def __init__(self, N_Gram):
+        self.N_Gram = N_Gram
+        self.n = N_Gram.n
+        self.vocabulary = N_Gram.vocabulary
+        self.gram_probabilities = N_Gram.gram_probabilities
+        # super().__init__(n, vocabulary, gram_probabilities)
+        # self.n = N_Gram.n
+        # self.voc
+
+    def vectorfill(self, starter, top_k=1, temperature=1):
+        
+        # Tokenize starting text
+        self.tokenize(starter, "Generate")
+        
+        # Finish off each sentence
+        for i, sentence in enumerate(self.test_updated_text):
+
+            while self.test_updated_text[i][-1] != "<STOP>":
+                k_samples = [[float('inf'), float('inf')]]
+                new_prefix = tuple(self.test_updated_text[i][-(self.n - 1):]) if self.n > 1 else ()
+
+                for k in range(top_k):
+                    greedy_word_info = self.greedy_word(new_prefix, k_samples[-1][0])
+                    if greedy_word_info[0] != 0:
+                        k_samples.append(greedy_word_info)
+
+                # Select next word from sample:
+                new_word_index = self.select_word(k_samples[1:], top_k, temperature)
+                new_word = self.vocabulary_list[new_word_index]
+
+                self.test_updated_text[i].append(new_word)
+            
+            # Yield the completed sentence
+            yield(" ".join(self.test_updated_text[i][self.n-1:-1]))
+
+    def greedy_word(self, prefix, ceiling=float('inf')):
+        newvector = [self.gram_probabilities[prefix][y] for y in self.vocabulary_list]
+        maxprob = 0
+        maxindex = -1
+        for i, prob in enumerate(newvector):
+            if prob > maxprob and prob < ceiling:
+                maxprob = prob
+                maxindex = i
+        return [maxprob, maxindex]
+    
+    def select_word(self, k_samples, top_k=1, temperature=1):
+
+        # Normalizing constant
+        normalizer = 0
+
+        for i in range(len((k_samples))):
+            
+            # Divide by temperature
+            k_samples[i][0] = k_samples[i][0] / temperature 
+
+            # Take the exponential
+            k_samples[i][0] = exp(k_samples[i][0])
+
+            # Increment the normalization constant
+            normalizer += k_samples[i][0]
+        
+        # Normalize every probability
+        for i in range(len(k_samples)):
+            k_samples[i][0] /= normalizer
+            # k_samples[i][1] = i
+
+        # Randomly pick from this weighted distribution
+        toarray = np.array(k_samples).T
+        index = random.choices(toarray[1], toarray[0], k=1)
+        
+        return int(index[0])
+            
+
+
+## To-Do
+"""
+class Generator DONE
+
+class NaiveBayes Predictor
+
+class chatbot
+
+class predictive text
+
+""" 
