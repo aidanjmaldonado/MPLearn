@@ -2,8 +2,6 @@ from math import *
 import numpy as np
 import collections as clt
 import random
-import sys
-
 
 class LanguageModel():
 
@@ -81,7 +79,7 @@ class LanguageModel():
                         self.token_occurences[start] += 1
 
         else:
-                ## Tokenize test_data
+            ## Tokenize test_data
             # Read the file
             with open(input, 'r') as f:
                 sentences = f.readlines()
@@ -106,9 +104,10 @@ class LanguageModel():
             for x, sentence in enumerate(sentences):
 
                 # Replace new words with UNK
-                for index, word in enumerate(sentence):
-                    if sentences[x][index] not in self.vocabulary:
-                        sentences[x][index] = "<UNK>"
+                if type == "Test": # Fix this, we still want to use UNK probabilities
+                    for index, word in enumerate(sentence):
+                        if sentences[x][index] not in self.vocabulary:
+                            sentences[x][index] = "<UNK>"
 
                 # Append "Stop" to end of each sentence
                 if x != len(sentences)-1 and type == "Test":
@@ -288,8 +287,12 @@ class Generator(LanguageModel):
                     if greedy_word_info[0] != 0:
                         k_samples.append(greedy_word_info)
 
-                # Select next word from sample:
-                new_word_index = self.select_word(k_samples[1:], top_k, temperature)
+                # Select next word from sample, and if no next word found, add a <UNK>
+                if len(k_samples) == 1:
+                    self.test_updated_text[i].append("<UNK>")
+                    continue
+
+                new_word_index = self.select_word(k_samples[1:], temperature)
                 new_word = self.vocabulary_list[new_word_index]
 
                 self.test_updated_text[i].append(new_word)
@@ -307,7 +310,7 @@ class Generator(LanguageModel):
                 maxindex = i
         return [maxprob, maxindex]
     
-    def select_word(self, k_samples, top_k=1, temperature=1):
+    def select_word(self, k_samples, temperature=1):
 
         # Normalizing constant
         normalizer = 0
@@ -325,8 +328,8 @@ class Generator(LanguageModel):
         
         # Normalize every probability
         for i in range(len(k_samples)):
+            
             k_samples[i][0] /= normalizer
-            # k_samples[i][1] = i
 
         # Randomly pick from this weighted distribution
         toarray = np.array(k_samples).T
@@ -347,3 +350,5 @@ class chatbot
 class predictive text
 
 """ 
+
+
